@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Schedule Matrix - Algorithm Ready</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 10px;
+			}
+
+			.table-container {
+				width: 100%;
+				max-height: 500px;
+				overflow: auto;
+				border: 1px solid #ccc;
+			}
+
+			table {
+				border-collapse: collapse;
+				font-size: 12px;
+			}
+
+			td {
+				border: 1px solid #ddd;
+				padding: 4px 6px;
+				white-space: nowrap;
+				text-align: center;
+				min-width: 70px;
+				height: 24px;
+			}
+
+			.date-row {
+				background: #e8f0fe;
+				font-weight: bold;
+				position: sticky;
+				top: 0;
+				z-index: 2;
+			}
+
+			.day-row {
+				background: #fce8e6;
+				font-weight: bold;
+				position: sticky;
+				top: 24px;
+				z-index: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>Schedule Matrix (Empty – Ready for Algorithm)</h2>
+
+		<div class="table-container" id="tableContainer">
+			<table id="matrixTable"></table>
+		</div>
+
+		<script>
+			const ROWS = 10;
+			const COLS = 191;
+
+			const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+			function formatDate(d) {
+				return d
+					.toLocaleDateString("en-GB", {
+						day: "2-digit",
+						month: "short",
+						year: "numeric",
+					})
+					.replace(/ /g, "");
+			}
+
+			// STEP 1️⃣ Create fully empty matrix
+			const matrix = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
+
+			// STEP 2️⃣ Fill DATE row (row 0) and DAY row (row 1), starting from column index 2
+			let currentDate = new Date("2026-02-01");
+
+			for (let c = 2; c < COLS; c++) {
+				matrix[0][c] = formatDate(currentDate);
+				matrix[1][c] = daysShort[currentDate.getDay()];
+				currentDate.setDate(currentDate.getDate() + 1);
+			}
+
+			// STEP 3️⃣ Keep ALL scheduling cells empty (2,2) → (9,190)
+			// We intentionally DO NOTHING here — algorithm will fill later
+
+			// STEP 4️⃣ Render table
+			const table = document.getElementById("matrixTable");
+
+			matrix.forEach((row, rIndex) => {
+				const tr = document.createElement("tr");
+
+				row.forEach((cell, cIndex) => {
+					const td = document.createElement("td");
+					td.textContent = cell;
+
+					if (rIndex === 0) td.classList.add("date-row");
+					if (rIndex === 1) td.classList.add("day-row");
+
+					tr.appendChild(td);
+				});
+
+				table.appendChild(tr);
+			});
+
+			// STEP 5️⃣ Shift + Scroll = Horizontal Scroll
+			const container = document.getElementById("tableContainer");
+			container.addEventListener("wheel", (e) => {
+				if (e.shiftKey) {
+					e.preventDefault();
+					container.scrollLeft += e.deltaY;
+				}
+			});
+
+			// Matrix is now globally available for algorithm step
+			console.log("Matrix initialized:", matrix);
+		</script>
+	</body>
+</html>

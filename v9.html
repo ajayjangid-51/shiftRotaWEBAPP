@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Shift Scheduler Pro Dashboard</title>
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 10px;
+			}
+			.table-container {
+				width: 100%;
+				max-height: 500px;
+				overflow: auto;
+				border: 1px solid #ccc;
+			}
+			table {
+				border-collapse: collapse;
+				font-size: 12px;
+			}
+			td,
+			th {
+				border: 1px solid #ddd;
+				padding: 4px 6px;
+				white-space: nowrap;
+				text-align: center;
+				min-width: 55px;
+			}
+
+			.date-row {
+				background: #e8f0fe;
+				font-weight: bold;
+				position: sticky;
+				top: 0;
+				z-index: 5;
+			}
+			.day-row {
+				background: #fce8e6;
+				font-weight: bold;
+				position: sticky;
+				top: 24px;
+				z-index: 5;
+			}
+
+			.sticky-col {
+				position: sticky;
+				left: 0;
+				background: #fff;
+				z-index: 4;
+			}
+			.sticky-col-2 {
+				position: sticky;
+				left: 80px;
+				background: #fff;
+				z-index: 4;
+			}
+			.summary-col {
+				background: #f5f5f5;
+				font-weight: bold;
+			}
+
+			.shift-M {
+				background: #d4f8d4;
+			}
+			.shift-A {
+				background: #d4e8ff;
+			}
+			.shift-N {
+				background: #e6d4ff;
+			}
+			.shift-WO {
+				background: #eee;
+			}
+			.shift-CWO {
+				background: #ffd966;
+			}
+			.shift-SL {
+				background: #ff9999;
+			}
+			.shift-PL {
+				background: #99ccff;
+			}
+			.shift-UL {
+				background: #ffcc99;
+			}
+
+			.locked {
+				opacity: 0.6;
+				pointer-events: none;
+			}
+
+			.dashboard-table {
+				border-collapse: collapse;
+				margin-bottom: 20px;
+				font-size: 13px;
+			}
+			.dashboard-table th,
+			.dashboard-table td {
+				border: 1px solid #aaa;
+				padding: 6px 10px;
+			}
+			.dashboard-table th {
+				background: #333;
+				color: white;
+			}
+
+			.legend span {
+				padding: 4px 10px;
+				margin-right: 8px;
+				border-radius: 4px;
+				font-size: 12px;
+				display: inline-block;
+			}
+			.controls {
+				margin-bottom: 10px;
+			}
+			button {
+				margin-right: 8px;
+				padding: 6px 10px;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>📅 Shift Scheduler Pro</h2>
+
+		<div class="controls">
+			Role:
+			<select id="roleSelect">
+				<option value="Viewer">Viewer</option>
+				<option value="Editor" selected>Editor</option>
+				<option value="Admin">Admin</option>
+			</select>
+
+			<button onclick="exportToExcel()">📤 Export to Excel</button>
+			<button onclick="clearStorage()">🗑 Clear Saved Data</button>
+		</div>
+
+		<div class="legend">
+			<span class="shift-M">M</span>
+			<span class="shift-A">A</span>
+			<span class="shift-N">N</span>
+			<span class="shift-WO">WO</span>
+			<span class="shift-CWO">CWO</span>
+			<span class="shift-SL">SL</span>
+			<span class="shift-PL">PL</span>
+			<span class="shift-UL">UL</span>
+		</div>
+
+		<div class="table-container">
+			<table id="matrixTable"></table>
+		</div>
+
+		<h3>📊 Shift Load Chart</h3>
+		<canvas id="shiftChart" height="120"></canvas>
+
+		<h3>📊 Saturday Support Table</h3>
+		<div id="satSupportTable"></div>
+
+		<h3>📊 Sunday Support Table</h3>
+		<div id="sunSupportTable"></div>
+
+		<h3>🗓️ Pending Comp-Off Queue</h3>
+		<div id="compOffTable"></div>
+
+		<script>
+			const ROWS = 10,
+				COLS = 191,
+				EMP_START_ROW = 2;
+			const EMP_IDS = ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"];
+			const EMP_NAMES = [
+				"Sarvesh",
+				"Prabhakar",
+				"Praveen",
+				"AbhiShek",
+				"Rahul",
+				"Shailender",
+				"Harsh",
+				"BalaChandra",
+			];
+			const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+			function formatDate(d) {
+				return d
+					.toLocaleDateString("en-GB", {
+						day: "2-digit",
+						month: "short",
+						year: "numeric",
+					})
+					.replace(/ /g, "");
+			}
+
+			// ===== LOAD OR INIT MATRIX =====
+			let matrix =
+				JSON.parse(localStorage.getItem("rotaMatrix")) ||
+				Array.from({ length: ROWS }, () => Array(COLS).fill(""));
+			if (!localStorage.getItem("rotaMatrix")) {
+				let d = new Date("2026-02-01");
+				for (let c = 2; c < COLS; c++) {
+					matrix[0][c] = formatDate(d);
+					matrix[1][c] = daysShort[d.getDay()];
+					d.setDate(d.getDate() + 1);
+				}
+				for (let i = 0; i < EMP_IDS.length; i++) {
+					matrix[i + 2][0] = EMP_NAMES[i];
+					matrix[i + 2][1] = EMP_IDS[i];
+				}
+			}
+
+			// ===== SUPPORT + COMPOFF =====
+			const satSupport = {},
+				sunSupport = {};
+			EMP_IDS.forEach((id) => {
+				satSupport[id] = { T: 0, M: 0, A: 0, N: 0 };
+				sunSupport[id] = { T: 0, M: 0, A: 0, N: 0 };
+			});
+			let compOffQueue = [];
+
+			// ===== SUMMARY =====
+			function calculateSummary() {
+				const summary = {};
+				EMP_IDS.forEach(
+					(id) =>
+						(summary[id] = {
+							M: 0,
+							A: 0,
+							N: 0,
+							WO: 0,
+							CWO: 0,
+							SL: 0,
+							PL: 0,
+							UL: 0,
+						}),
+				);
+				for (let r = EMP_START_ROW; r < ROWS; r++) {
+					let id = matrix[r][1];
+					for (let c = 2; c < COLS; c++) {
+						let v = matrix[r][c];
+						if (summary[id][v] !== undefined) summary[id][v]++;
+					}
+				}
+				return summary;
+			}
+
+			// ===== RENDER TABLE =====
+			function renderTable() {
+				const table = document.getElementById("matrixTable");
+				table.innerHTML = "";
+				const summary = calculateSummary();
+				const role = document.getElementById("roleSelect").value;
+				const today = new Date();
+
+				matrix.forEach((row, r) => {
+					let tr = document.createElement("tr");
+					row.forEach((cell, c) => {
+						let td = document.createElement("td");
+						td.textContent = cell;
+
+						if (c === 0) td.classList.add("sticky-col");
+						if (c === 1) td.classList.add("sticky-col-2");
+						if (r === 0) td.classList.add("date-row");
+						else if (r === 1) td.classList.add("day-row");
+						else {
+							td.dataset.row = r;
+							td.dataset.col = c;
+							if (["M", "A", "N", "WO", "CWO", "SL", "PL", "UL"].includes(cell))
+								td.classList.add("shift-" + cell);
+
+							let cellDate = new Date(
+								matrix[0][c].replace(
+									/([0-9]{2})([A-Za-z]{3})([0-9]{4})/,
+									"$1 $2 $3",
+								),
+							);
+							if (
+								role === "Viewer" ||
+								(role === "Editor" && cellDate < today)
+							) {
+								td.classList.add("locked");
+							} else {
+								td.addEventListener("click", editCell);
+							}
+						}
+
+						if (r >= 2 && c === COLS - 1) {
+							const id = row[1],
+								s = summary[id];
+							["M", "A", "N", "WO", "CWO", "SL", "PL", "UL"].forEach((k) => {
+								let sumTd = document.createElement("td");
+								sumTd.textContent = s[k];
+								sumTd.classList.add("summary-col");
+								tr.appendChild(sumTd);
+							});
+						}
+
+						tr.appendChild(td);
+					});
+					table.appendChild(tr);
+				});
+
+				updateChart(summary);
+				localStorage.setItem("rotaMatrix", JSON.stringify(matrix));
+			}
+
+			// ===== CELL EDIT =====
+			function editCell(e) {
+				const td = e.target,
+					r = td.dataset.row,
+					c = td.dataset.col;
+				const select = document.createElement("select");
+				["", "M", "A", "N", "WO", "CWO", "SL", "PL", "UL"].forEach((v) => {
+					let opt = document.createElement("option");
+					opt.value = v;
+					opt.textContent = v;
+					if (v === td.textContent) opt.selected = true;
+					select.appendChild(opt);
+				});
+				select.onchange = () => {
+					matrix[r][c] = select.value;
+					renderTable();
+				};
+				td.innerHTML = "";
+				td.appendChild(select);
+				select.focus();
+			}
+
+			// ===== CHART =====
+			let chart;
+			function updateChart(summary) {
+				const labels = EMP_IDS;
+				const mData = labels.map((id) => summary[id].M);
+				const aData = labels.map((id) => summary[id].A);
+				const nData = labels.map((id) => summary[id].N);
+				const ctx = document.getElementById("shiftChart");
+				if (chart) chart.destroy();
+				chart = new Chart(ctx, {
+					type: "bar",
+					data: {
+						labels,
+						datasets: [
+							{ label: "Morning", data: mData, backgroundColor: "#6fdc6f" },
+							{ label: "Afternoon", data: aData, backgroundColor: "#6fa8ff" },
+							{ label: "Night", data: nData, backgroundColor: "#b97aff" },
+						],
+					},
+				});
+			}
+
+			// ===== EXPORT TO EXCEL =====
+			function exportToExcel() {
+				let csv = "";
+				matrix.forEach((row) => (csv += row.join(",") + "\n"));
+				let blob = new Blob([csv], { type: "text/csv" });
+				let a = document.createElement("a");
+				a.href = URL.createObjectURL(blob);
+				a.download = "rota.csv";
+				a.click();
+			}
+
+			// ===== CLEAR STORAGE =====
+			function clearStorage() {
+				if (document.getElementById("roleSelect").value !== "Admin") {
+					alert("Only Admin can clear data");
+					return;
+				}
+				localStorage.removeItem("rotaMatrix");
+				location.reload();
+			}
+
+			// ===== SCROLL SHORTCUT =====
+			document
+				.querySelector(".table-container")
+				.addEventListener("wheel", (e) => {
+					if (e.shiftKey) {
+						e.preventDefault();
+						e.currentTarget.scrollLeft += e.deltaY;
+					}
+				});
+
+			renderTable();
+		</script>
+	</body>
+</html>

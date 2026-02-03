@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Shift Scheduler Engine</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 10px;
+			}
+			.table-container {
+				width: 100%;
+				max-height: 500px;
+				overflow: auto;
+				border: 1px solid #ccc;
+			}
+			table {
+				border-collapse: collapse;
+				font-size: 12px;
+			}
+			td {
+				border: 1px solid #ddd;
+				padding: 4px 6px;
+				white-space: nowrap;
+				text-align: center;
+				min-width: 55px;
+			}
+			.date-row {
+				background: #e8f0fe;
+				font-weight: bold;
+				position: sticky;
+				top: 0;
+			}
+			.day-row {
+				background: #fce8e6;
+				font-weight: bold;
+				position: sticky;
+				top: 24px;
+			}
+			/* Shift Colors */
+			.shift-M {
+				background-color: #d4f8d4;
+			} /* Morning */
+			.shift-A {
+				background-color: #d4e8ff;
+			} /* Afternoon */
+			.shift-N {
+				background-color: #e6d4ff;
+			} /* Night */
+			.shift-WO {
+				background-color: #eeeeee;
+			} /* Week Off */
+			.shift-CWO {
+				background-color: #ffd966;
+			} /* Comp Off */
+			.shift-AHO {
+				background-color: #ffb3c6;
+			} /* Afternoon Holiday */
+			.shift-MHO {
+				background-color: #ffd9b3;
+			} /* Morning Holiday */
+			.dashboard-table {
+				border-collapse: collapse;
+				margin-bottom: 20px;
+				font-size: 13px;
+			}
+
+			.dashboard-table th,
+			.dashboard-table td {
+				border: 1px solid #aaa;
+				padding: 6px 10px;
+				text-align: center;
+			}
+
+			.dashboard-table th {
+				background: #333;
+				color: white;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>Automated Shift Rotation with Comp-Off</h2>
+		<div class="table-container"><table id="matrixTable"></table></div>
+
+		<h3>📊 Saturday Support Table</h3>
+		<div id="satSupportTable"></div>
+
+		<h3>📊 Sunday Support Table</h3>
+		<div id="sunSupportTable"></div>
+
+		<h3>🗓️ Pending Comp-Off Queue</h3>
+		<div id="compOffTable"></div>
+
+		<script>
+			const ROWS = 10;
+			const COLS = 191;
+			const EMP_START_ROW = 2;
+			const EMP_IDS = ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"];
+			const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+			function formatDate(d) {
+				return d
+					.toLocaleDateString("en-GB", {
+						day: "2-digit",
+						month: "short",
+						year: "numeric",
+					})
+					.replace(/ /g, "");
+			}
+
+			// ---------------- MATRIX INIT ----------------
+			const matrix = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
+			let d = new Date("2026-02-01");
+			for (let c = 2; c < COLS; c++) {
+				matrix[0][c] = formatDate(d);
+				matrix[1][c] = daysShort[d.getDay()];
+				d.setDate(d.getDate() + 1);
+			}
+
+			// ---------------- INITIAL SEED DATA (POINT 1) ----------------
+			for (let c = 2; c <= 7; c++) {
+				matrix[2][c] = "A";
+				matrix[3][c] = "A";
+				matrix[4][c] = "N";
+				matrix[5][c] = "N";
+				matrix[6][c] = "M";
+				matrix[7][c] = "M";
+				matrix[8][c] = "M";
+				matrix[9][c] = "A";
+			}
+			// for (let r = 2; r <= 7; r++) {
+			matrix[2][0] = "Sarvesh";
+			matrix[2][1] = "L1";
+			matrix[3][0] = "Prabhakar";
+			matrix[3][1] = "L2";
+			matrix[4][0] = "Praveen";
+			matrix[4][1] = "L3";
+			matrix[5][0] = "AbhiShek";
+			matrix[5][1] = "L4";
+			matrix[6][0] = "Rahul";
+			matrix[6][1] = "L5";
+			matrix[7][0] = "Shailender";
+			matrix[7][1] = "L6";
+			matrix[8][0] = "Harsh";
+			matrix[8][1] = "L7";
+			matrix[9][0] = "BalaChandra";
+			matrix[9][1] = "L8";
+			// }
+
+			// ---------------- SUPPORT TABLES ----------------
+			const satSupport = {},
+				sunSupport = {};
+			EMP_IDS.forEach((id) => {
+				console.log("the id is", id);
+				satSupport[id] = { T: 0, M: 0, A: 0, N: 0 };
+				sunSupport[id] = { T: 0, M: 0, A: 0, N: 0 };
+			});
+			console.log(satSupport);
+			console.log(sunSupport);
+
+			// ---------------- PENDING COMP-OFF FIFO ----------------
+			let compOffQueue = [];
+
+			function addCompOff(id, date) {
+				let rec = compOffQueue.find(
+					(r) => r.id === id && r.cnt < 3 && !r.compOffGiven,
+				);
+				if (!rec) {
+					compOffQueue.push({ id, cnt: 1, dates: [date], compOffGiven: false });
+				} else {
+					rec.cnt++;
+					rec.dates.push(date);
+				}
+			}
+			// ---------------- HELPER FUNCTIONS ----------------
+			function renderSupportTable(containerId, tableData, title) {
+				const container = document.getElementById(containerId);
+				let html = "<table class='dashboard-table'>";
+				html +=
+					"<tr><th>ID</th><th>Total</th><th>M</th><th>A</th><th>N</th></tr>";
+
+				Object.keys(tableData).forEach((id) => {
+					const t = tableData[id];
+					html += `<tr>
+                                <td>${id}</td>
+                                <td>${t.T}</td>
+                                <td>${t.M}</td>
+                                <td>${t.A}</td>
+                                <td>${t.N}</td>
+                            </tr>`;
+				});
+
+				html += "</table>";
+				container.innerHTML = html;
+			}
+
+			function renderCompOffTable() {
+				const container = document.getElementById("compOffTable");
+
+				let html = "<table class='dashboard-table'>";
+				html +=
+					"<tr><th>ID</th><th>Count</th><th>Supported Dates</th><th>Comp-Off Given</th></tr>";
+
+				compOffQueue.forEach((rec) => {
+					html += `<tr>
+                                <td>${rec.id}</td>
+                                <td>${rec.cnt}</td>
+                                <td>${rec.dates.join("; ")}</td>
+                                <td>${rec.compOffGiven ? "✅ Yes" : "❌ No"}</td>
+                            </tr>`;
+				});
+
+				html += "</table>";
+				container.innerHTML = html;
+			}
+
+			// ---------------- HELPER FUNCTIONS ----------------
+			function getRowById(id) {
+				return EMP_IDS.indexOf(id) + EMP_START_ROW;
+			}
+
+			function pickEmployee(candidates, table, shift) {
+				console.log("the candidates are : ", candidates, table, shift);
+				return candidates.sort((a, b) => {
+					if (table[a].T !== table[b].T) return table[a].T - table[b].T;
+					if (table[a][shift] !== table[b][shift])
+						return table[a][shift] - table[b][shift];
+					return EMP_IDS.indexOf(a) - EMP_IDS.indexOf(b);
+				})[0];
+			}
+
+			// ---------------- FIND FIRST SATURDAY ----------------
+			let firstSatCol = 2;
+			while (matrix[1][firstSatCol] !== "Sat") firstSatCol++;
+
+			// ---------------- WEEKLY LOOP ----------------
+			for (let satCol = firstSatCol; satCol < COLS - 6; satCol += 7) {
+				let friCol = satCol - 1;
+				let sunCol = satCol + 1;
+				let monCol = satCol + 2;
+				let nextFriCol = satCol + 6;
+
+				// ----- SATURDAY -----
+				let friM = [],
+					friA = [];
+				EMP_IDS.forEach((id) => {
+					let r = getRowById(id);
+					if (matrix[r][friCol] === "M") friM.push(id);
+					if (matrix[r][friCol] === "A") friA.push(id);
+				});
+
+				let mSat = pickEmployee(friM, satSupport, "M");
+				let aSat = pickEmployee(friA, satSupport, "A");
+				console.log(
+					"the picked employee for m and a are resepectively : ",
+					mSat,
+					" and ",
+					aSat,
+				);
+
+				EMP_IDS.forEach((id) => {
+					let r = getRowById(id);
+					if (id === mSat) {
+						matrix[r][satCol] = "M";
+						satSupport[id].T++;
+						satSupport[id].M++;
+						addCompOff(id, matrix[0][satCol]);
+					} else if (id === aSat) {
+						matrix[r][satCol] = "A";
+						satSupport[id].T++;
+						satSupport[id].A++;
+						addCompOff(id, matrix[0][satCol]);
+					} else matrix[r][satCol] = "WO";
+				});
+
+				// ----- SUNDAY TO FRIDAY -----
+				let sunMCandidates = [],
+					sunNCandidates = [];
+				EMP_IDS.forEach((id) => {
+					let r = getRowById(id);
+					if (matrix[r][friCol] === "A" && matrix[r][satCol] === "WO")
+						sunMCandidates.push(id);
+					if (matrix[r][friCol] === "M" && matrix[r][satCol] === "WO")
+						sunNCandidates.push(id);
+				});
+
+				let mSun = pickEmployee(sunMCandidates, sunSupport, "M");
+				// let nSun = sunNCandidates
+				// 	.sort((a, b) => {
+				// 		if (sunSupport[a].T !== sunSupport[b].T)
+				// 			return sunSupport[a].T - sunSupport[b].T;
+				// 		if (sunSupport[a].N !== sunSupport[b].N)
+				// 			return sunSupport[a].N - sunSupport[b].N;
+				// 		return EMP_IDS.indexOf(a) - EMP_IDS.indexOf(b);
+				// 	})
+				// 	.slice(0, 2);
+				let nSun = sunNCandidates;
+
+				EMP_IDS.forEach((id) => {
+					let r = getRowById(id);
+
+					if (id === mSun) {
+						for (let c = sunCol; c <= nextFriCol; c++) matrix[r][c] = "M";
+						// sunSupport[id].T++;
+						// sunSupport[id].M++;
+						addCompOff(id, matrix[0][sunCol]);
+					} else if (nSun.includes(id)) {
+						for (let c = sunCol; c <= nextFriCol; c++) matrix[r][c] = "N";
+						sunSupport[id].T++;
+						sunSupport[id].N++;
+						addCompOff(id, matrix[0][sunCol]);
+					} else if (matrix[r][friCol] === "N") {
+						matrix[r][sunCol] = "WO";
+						for (let c = monCol; c <= nextFriCol; c++) matrix[r][c] = "A";
+					} else if (id === mSat) {
+						matrix[r][sunCol] = "WO";
+						for (let c = monCol; c <= nextFriCol; c++) matrix[r][c] = "A";
+					}
+				});
+
+				// ----- WEEKLY COMP-OFF PROCESS -----
+				let given = 0;
+				for (let rec of compOffQueue) {
+					if (rec.compOffGiven) continue;
+					let r = getRowById(rec.id);
+					if (matrix[r][monCol] === "A" || matrix[r][monCol] === "M") {
+						let daysGiven = 0;
+						for (let c = monCol; c < COLS && daysGiven < rec.cnt; c++) {
+							if (matrix[r][c] !== "AHO" && matrix[r][c] !== "MHO") {
+								matrix[r][c] = "CWO";
+								daysGiven++;
+							}
+						}
+						rec.compOffGiven = true;
+						given++;
+					}
+					if (given === 2) break;
+				}
+			}
+
+			// ---------------- RENDER TABLE ----------------
+			const table = document.getElementById("matrixTable");
+			matrix.forEach((row, r) => {
+				let tr = document.createElement("tr");
+				row.forEach((cell) => {
+					let td = document.createElement("td");
+					td.textContent = cell;
+					if (r === 0) td.className = "date-row";
+					if (r === 1) td.className = "day-row";
+					else {
+						// Apply shift color classes
+						if (cell === "M") td.classList.add("shift-M");
+						else if (cell === "A") td.classList.add("shift-A");
+						else if (cell === "N") td.classList.add("shift-N");
+						else if (cell === "WO") td.classList.add("shift-WO");
+						else if (cell === "CWO") td.classList.add("shift-CWO");
+						else if (cell === "AHO") td.classList.add("shift-AHO");
+						else if (cell === "MHO") td.classList.add("shift-MHO");
+					}
+					tr.appendChild(td);
+				});
+				table.appendChild(tr);
+			});
+
+			// Shift + Scroll = horizontal
+			document
+				.querySelector(".table-container")
+				.addEventListener("wheel", (e) => {
+					if (e.shiftKey) {
+						e.preventDefault();
+						e.currentTarget.scrollLeft += e.deltaY;
+					}
+				});
+
+			renderSupportTable("satSupportTable", satSupport);
+			renderSupportTable("sunSupportTable", sunSupport);
+			renderCompOffTable();
+		</script>
+	</body>
+</html>

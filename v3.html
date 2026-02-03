@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Schedule Matrix</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 10px;
+			}
+
+			.table-container {
+				width: 100%;
+				max-height: 500px;
+				overflow: auto;
+				border: 1px solid #ccc;
+			}
+
+			table {
+				border-collapse: collapse;
+				font-size: 12px;
+			}
+
+			td {
+				border: 1px solid #ddd;
+				padding: 4px 6px;
+				white-space: nowrap;
+				text-align: center;
+			}
+
+			tr:nth-child(even) td:not(.header-cell) {
+				background-color: #f9f9f9;
+			}
+
+			.header-cell {
+				background-color: #e8f0fe;
+				font-weight: bold;
+				position: sticky;
+				top: 0;
+				z-index: 2;
+			}
+
+			.day-cell {
+				background-color: #fce8e6;
+				font-weight: bold;
+				position: sticky;
+				top: 24px;
+				z-index: 1;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>Schedule Matrix (Feb 1, 2026 – Aug 8, 2026)</h2>
+
+		<div class="table-container" id="tableContainer">
+			<table id="matrixTable"></table>
+		</div>
+
+		<script>
+			const ROWS = 10;
+			const COLS = 191;
+			const SUMMARY_COLS = 0;
+
+			const table = document.getElementById("matrixTable");
+
+			const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+			function formatDate(d) {
+				return d
+					.toLocaleDateString("en-GB", {
+						day: "2-digit",
+						month: "short",
+						year: "numeric",
+					})
+					.replace(/ /g, "");
+			}
+
+			// Create empty matrix
+			const matrix = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
+
+			// Fill dates and days starting from column index 2
+			let currentDate = new Date("2026-02-01");
+
+			for (let c = 2; c < COLS; c++) {
+				matrix[0][c] = formatDate(currentDate); // Row 0 = Date
+				matrix[1][c] = daysShort[currentDate.getDay()]; // Row 1 = Day
+				currentDate.setDate(currentDate.getDate() + 1);
+			}
+			for (let r = 2; r < ROWS; r++) {
+				matrix[r][0] = `Employee ${r - 1}`; // Second column as Employee Name
+				matrix[r][1] = `L${r - 1}`; // First column = Employee ID
+			}
+
+			// Fill remaining cells (from row index 2, col index 2)
+			const words = ["M", "A", "N", "WO", "WCO", "MHO", "AHO"];
+			// for (let r = 2; r < ROWS; r++) {
+			// 	for (let c = 2; c < COLS; c++) {
+			// 		matrix[r][c] = words[Math.floor(Math.random() * words.length)];
+			// 	}
+			// }
+			for (let c = 2; c <= 7; c++) {
+				matrix[2][c] = "A";
+				matrix[3][c] = "A";
+				matrix[4][c] = "N";
+				matrix[5][c] = "N";
+				matrix[6][c] = "M";
+				matrix[7][c] = "M";
+				matrix[8][c] = "M";
+				matrix[9][c] = "A";
+			}
+
+			// Render table
+			matrix.forEach((row, rIndex) => {
+				const tr = document.createElement("tr");
+
+				row.forEach((cell, cIndex) => {
+					const td = document.createElement("td");
+					td.textContent = cell;
+
+					// Style date row
+					if (rIndex === 0) td.classList.add("header-cell");
+
+					// Style day row
+					if (rIndex === 1) td.classList.add("day-cell");
+
+					tr.appendChild(td);
+				});
+
+				table.appendChild(tr);
+			});
+
+			// Shift + Scroll = Horizontal Scroll
+			const container = document.getElementById("tableContainer");
+			container.addEventListener("wheel", (e) => {
+				if (e.shiftKey) {
+					e.preventDefault();
+					container.scrollLeft += e.deltaY;
+				}
+			});
+		</script>
+	</body>
+</html>

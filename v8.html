@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Shift Scheduler Dashboard</title>
+
+		<!-- Chart.js -->
+		<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 10px;
+			}
+			.table-container {
+				width: 100%;
+				max-height: 500px;
+				overflow: auto;
+				border: 1px solid #ccc;
+			}
+
+			table {
+				border-collapse: collapse;
+				font-size: 12px;
+			}
+			td,
+			th {
+				border: 1px solid #ddd;
+				padding: 4px 6px;
+				white-space: nowrap;
+				text-align: center;
+				min-width: 55px;
+			}
+
+			.date-row {
+				background: #e8f0fe;
+				font-weight: bold;
+				position: sticky;
+				top: 0;
+				z-index: 5;
+			}
+			.day-row {
+				background: #fce8e6;
+				font-weight: bold;
+				position: sticky;
+				top: 24px;
+				z-index: 5;
+			}
+
+			/* Sticky Summary Columns */
+			.sticky-col {
+				position: sticky;
+				left: 0;
+				background: #fff;
+				z-index: 4;
+			}
+			.sticky-col-2 {
+				position: sticky;
+				left: 80px;
+				background: #fff;
+				z-index: 4;
+			}
+			.summary-col {
+				background: #f5f5f5;
+				font-weight: bold;
+			}
+
+			/* Shift Colors */
+			.shift-M {
+				background: #d4f8d4;
+			}
+			.shift-A {
+				background: #d4e8ff;
+			}
+			.shift-N {
+				background: #e6d4ff;
+			}
+			.shift-WO {
+				background: #eee;
+			}
+			.shift-CWO {
+				background: #ffd966;
+			}
+			.shift-SL {
+				background: #ff9999;
+			}
+			.shift-PL {
+				background: #99ccff;
+			}
+			.shift-UL {
+				background: #ffcc99;
+			}
+
+			.dashboard-table {
+				border-collapse: collapse;
+				margin-bottom: 20px;
+				font-size: 13px;
+			}
+			.dashboard-table th,
+			.dashboard-table td {
+				border: 1px solid #aaa;
+				padding: 6px 10px;
+			}
+			.dashboard-table th {
+				background: #333;
+				color: white;
+			}
+
+			.legend span {
+				padding: 4px 10px;
+				margin-right: 8px;
+				border-radius: 4px;
+				font-size: 12px;
+				display: inline-block;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>📅 Shift Scheduler Dashboard</h2>
+
+		<div class="legend">
+			<span class="shift-M">M</span>
+			<span class="shift-A">A</span>
+			<span class="shift-N">N</span>
+			<span class="shift-WO">WO</span>
+			<span class="shift-CWO">CWO</span>
+			<span class="shift-SL">SL</span>
+			<span class="shift-PL">PL</span>
+			<span class="shift-UL">UL</span>
+		</div>
+
+		<div class="table-container">
+			<table id="matrixTable"></table>
+		</div>
+
+		<h3>📊 Shift Load Chart</h3>
+		<canvas id="shiftChart" height="120"></canvas>
+
+		<h3>📊 Saturday Support Table</h3>
+		<div id="satSupportTable"></div>
+
+		<h3>📊 Sunday Support Table</h3>
+		<div id="sunSupportTable"></div>
+
+		<h3>🗓️ Pending Comp-Off Queue</h3>
+		<div id="compOffTable"></div>
+
+		<script>
+			// ========== BASIC SETUP ==========
+			const ROWS = 10,
+				COLS = 191,
+				EMP_START_ROW = 2;
+			const EMP_IDS = ["L1", "L2", "L3", "L4", "L5", "L6", "L7", "L8"];
+			const EMP_NAMES = [
+				"Sarvesh",
+				"Prabhakar",
+				"Praveen",
+				"AbhiShek",
+				"Rahul",
+				"Shailender",
+				"Harsh",
+				"BalaChandra",
+			];
+			const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+			function formatDate(d) {
+				return d
+					.toLocaleDateString("en-GB", {
+						day: "2-digit",
+						month: "short",
+						year: "numeric",
+					})
+					.replace(/ /g, "");
+			}
+
+			// ========== MATRIX INIT ==========
+			const matrix = Array.from({ length: ROWS }, () => Array(COLS).fill(""));
+			let d = new Date("2026-02-01");
+			for (let c = 2; c < COLS; c++) {
+				matrix[0][c] = formatDate(d);
+				matrix[1][c] = daysShort[d.getDay()];
+				d.setDate(d.getDate() + 1);
+			}
+
+			// Employee labels
+			for (let i = 0; i < EMP_IDS.length; i++) {
+				matrix[i + 2][0] = EMP_NAMES[i];
+				matrix[i + 2][1] = EMP_IDS[i];
+			}
+
+			// ========== SUPPORT + COMPOFF ==========
+			const satSupport = {},
+				sunSupport = {};
+			EMP_IDS.forEach((id) => {
+				satSupport[id] = { T: 0, M: 0, A: 0, N: 0 };
+				sunSupport[id] = { T: 0, M: 0, A: 0, N: 0 };
+			});
+			let compOffQueue = [];
+
+			// ========== SUMMARY CALC ==========
+			function calculateSummary() {
+				const summary = {};
+				EMP_IDS.forEach(
+					(id) =>
+						(summary[id] = {
+							M: 0,
+							A: 0,
+							N: 0,
+							WO: 0,
+							CWO: 0,
+							SL: 0,
+							PL: 0,
+							UL: 0,
+						}),
+				);
+
+				for (let r = EMP_START_ROW; r < ROWS; r++) {
+					let id = matrix[r][1];
+					for (let c = 2; c < COLS; c++) {
+						let v = matrix[r][c];
+						if (summary[id][v] !== undefined) summary[id][v]++;
+					}
+				}
+				return summary;
+			}
+
+			// ========== TABLE RENDER ==========
+			function renderTable() {
+				const table = document.getElementById("matrixTable");
+				table.innerHTML = "";
+				const summary = calculateSummary();
+
+				matrix.forEach((row, r) => {
+					let tr = document.createElement("tr");
+					row.forEach((cell, c) => {
+						let td = document.createElement("td");
+						td.textContent = cell;
+
+						if (c === 0) td.classList.add("sticky-col");
+						if (c === 1) td.classList.add("sticky-col-2");
+
+						if (r === 0) td.classList.add("date-row");
+						else if (r === 1) td.classList.add("day-row");
+						else {
+							td.dataset.row = r;
+							td.dataset.col = c;
+							if (["M", "A", "N", "WO", "CWO", "SL", "PL", "UL"].includes(cell))
+								td.classList.add("shift-" + cell);
+							td.addEventListener("click", editCell);
+						}
+
+						// Append summary columns at row end
+						if (r >= 2 && c === COLS - 1) {
+							const id = row[1],
+								s = summary[id];
+							["M", "A", "N", "WO", "CWO", "SL", "PL", "UL"].forEach((k) => {
+								let sumTd = document.createElement("td");
+								sumTd.textContent = s[k];
+								sumTd.classList.add("summary-col");
+								tr.appendChild(sumTd);
+							});
+						}
+
+						tr.appendChild(td);
+					});
+					table.appendChild(tr);
+				});
+
+				updateChart(summary);
+			}
+
+			// ========== CELL EDIT ==========
+			function editCell(e) {
+				const td = e.target;
+				const r = td.dataset.row,
+					c = td.dataset.col;
+				if (r < 2 || c < 2) return;
+
+				const select = document.createElement("select");
+				["", "M", "A", "N", "WO", "CWO", "SL", "PL", "UL"].forEach((v) => {
+					let opt = document.createElement("option");
+					opt.value = v;
+					opt.textContent = v;
+					if (v === td.textContent) opt.selected = true;
+					select.appendChild(opt);
+				});
+
+				select.onchange = () => {
+					matrix[r][c] = select.value;
+					renderTable();
+				};
+
+				td.innerHTML = "";
+				td.appendChild(select);
+				select.focus();
+			}
+
+			// ========== CHART ==========
+			let chart;
+			function updateChart(summary) {
+				const labels = EMP_IDS;
+				const mData = labels.map((id) => summary[id].M);
+				const aData = labels.map((id) => summary[id].A);
+				const nData = labels.map((id) => summary[id].N);
+
+				const ctx = document.getElementById("shiftChart");
+				if (chart) chart.destroy();
+				chart = new Chart(ctx, {
+					type: "bar",
+					data: {
+						labels,
+						datasets: [
+							{ label: "Morning", data: mData, backgroundColor: "#6fdc6f" },
+							{ label: "Afternoon", data: aData, backgroundColor: "#6fa8ff" },
+							{ label: "Night", data: nData, backgroundColor: "#b97aff" },
+						],
+					},
+					options: {
+						responsive: true,
+						plugins: { legend: { position: "top" } },
+					},
+				});
+			}
+
+			// ========== DASHBOARD TABLES ==========
+			function renderSupportTable(containerId, tableData) {
+				let html =
+					"<table class='dashboard-table'><tr><th>ID</th><th>Total</th><th>M</th><th>A</th><th>N</th></tr>";
+				Object.keys(tableData).forEach((id) => {
+					let t = tableData[id];
+					html += `<tr><td>${id}</td><td>${t.T}</td><td>${t.M}</td><td>${t.A}</td><td>${t.N}</td></tr>`;
+				});
+				html += "</table>";
+				document.getElementById(containerId).innerHTML = html;
+			}
+
+			function renderCompOffTable() {
+				let html =
+					"<table class='dashboard-table'><tr><th>ID</th><th>Count</th><th>Dates</th><th>Given</th></tr>";
+				compOffQueue.forEach((r) => {
+					html += `<tr><td>${r.id}</td><td>${r.cnt}</td><td>${r.dates.join("; ")}</td><td>${r.compOffGiven ? "Yes" : "No"}</td></tr>`;
+				});
+				html += "</table>";
+				document.getElementById("compOffTable").innerHTML = html;
+			}
+
+			// ========== SCROLL SHORTCUT ==========
+			document
+				.querySelector(".table-container")
+				.addEventListener("wheel", (e) => {
+					if (e.shiftKey) {
+						e.preventDefault();
+						e.currentTarget.scrollLeft += e.deltaY;
+					}
+				});
+
+			// ========== INITIAL RENDER ==========
+			renderTable();
+			renderSupportTable("satSupportTable", satSupport);
+			renderSupportTable("sunSupportTable", sunSupport);
+			renderCompOffTable();
+		</script>
+	</body>
+</html>

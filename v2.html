@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Matrix Table with Summary Toggle</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				margin: 10px;
+			}
+
+			h2 {
+				margin-bottom: 8px;
+			}
+
+			.controls {
+				margin-bottom: 10px;
+			}
+
+			button {
+				padding: 6px 12px;
+				cursor: pointer;
+				border: 1px solid #888;
+				background: #f2f2f2;
+				border-radius: 4px;
+			}
+
+			button:hover {
+				background: #e6e6e6;
+			}
+
+			.table-container {
+				width: 100%;
+				max-height: 500px;
+				overflow: auto;
+				border: 1px solid #ccc;
+			}
+
+			table {
+				border-collapse: collapse;
+				font-size: 12px;
+			}
+
+			td {
+				border: 1px solid #ddd;
+				padding: 4px 6px;
+				white-space: nowrap;
+				text-align: center;
+			}
+
+			tr:nth-child(even) {
+				background-color: #f9f9f9;
+			}
+
+			.summary-hidden {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>20 × 220 Matrix Table</h2>
+
+		<div class="controls">
+			<button id="toggleSummary">Hide Summary Columns</button>
+		</div>
+
+		<div class="table-container" id="tableContainer">
+			<table id="matrixTable"></table>
+		</div>
+
+		<script>
+			// const ROWS = 20;
+			// const COLS = 220;
+			// const SUMMARY_COLS = 15;
+			const ROWS = 10;
+			const COLS = 191;
+			const SUMMARY_COLS = 0;
+
+			const words = ["Alpha", "Beta", "Gamma", "Delta", "Omega", "Sigma"];
+			const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+			function randomDate() {
+				const start = new Date(2026, 1, 1);
+				const end = new Date(2026, 8, 8);
+				return new Date(start.getTime() + Math.random() * (end - start))
+					.toISOString()
+					.split("T")[0];
+			}
+
+			// Create matrix data
+			const matrix = Array.from({ length: ROWS }, (_, r) =>
+				Array.from({ length: COLS }, (_, c) => {
+					const type = (r + c) % 4;
+					switch (type) {
+						case 0:
+							return randomDate();
+						case 1:
+							return days[(r + c) % 7];
+						case 2:
+							return words[Math.floor(Math.random() * words.length)];
+						case 3:
+							return Math.floor(Math.random() * 1000);
+					}
+				}),
+			);
+
+			// Render table
+			const table = document.getElementById("matrixTable");
+
+			matrix.forEach((row) => {
+				const tr = document.createElement("tr");
+
+				row.forEach((cell, colIndex) => {
+					const td = document.createElement("td");
+					td.textContent = cell;
+
+					if (colIndex < SUMMARY_COLS) {
+						td.classList.add("summary-col");
+					}
+
+					tr.appendChild(td);
+				});
+
+				table.appendChild(tr);
+			});
+
+			// Toggle summary columns
+			const toggleBtn = document.getElementById("toggleSummary");
+			let summaryVisible = true;
+
+			toggleBtn.addEventListener("click", () => {
+				document.querySelectorAll(".summary-col").forEach((cell) => {
+					cell.classList.toggle("summary-hidden");
+				});
+
+				summaryVisible = !summaryVisible;
+				toggleBtn.textContent = summaryVisible
+					? "Hide Summary Columns"
+					: "Show Summary Columns";
+			});
+
+			// Shift + Scroll → Horizontal scroll
+			const container = document.getElementById("tableContainer");
+
+			container.addEventListener("wheel", (e) => {
+				if (e.shiftKey) {
+					e.preventDefault();
+					container.scrollLeft += e.deltaY;
+				}
+			});
+		</script>
+	</body>
+</html>

@@ -1,0 +1,85 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Matrix Table</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+			}
+			.table-container {
+				width: 100%;
+				overflow-x: auto; /* Important for 220 columns */
+				border: 1px solid #ccc;
+			}
+			table {
+				border-collapse: collapse;
+				font-size: 12px;
+			}
+			td {
+				border: 1px solid #ddd;
+				padding: 4px 6px;
+				white-space: nowrap;
+				text-align: center;
+			}
+			tr:nth-child(even) {
+				background-color: #f9f9f9;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>20 x 220 Matrix Table</h2>
+		<div class="table-container">
+			<table id="matrixTable"></table>
+		</div>
+
+		<script>
+			const ROWS = 20;
+			const COLS = 220;
+
+			// Helper data
+			const words = ["Alpha", "Beta", "Gamma", "Delta", "Omega", "Sigma"];
+			const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+			function randomDate() {
+				const start = new Date(2024, 0, 1);
+				const end = new Date(2026, 11, 31);
+				return new Date(start.getTime() + Math.random() * (end - start))
+					.toISOString()
+					.split("T")[0];
+			}
+
+			// Create 2D array
+			const matrix = Array.from({ length: ROWS }, (_, r) =>
+				Array.from({ length: COLS }, (_, c) => {
+					const type = (r + c) % 4;
+
+					switch (type) {
+						case 0:
+							return randomDate(); // Date
+						case 1:
+							return days[(r + c) % 7]; // Day name
+						case 2:
+							return words[Math.floor(Math.random() * words.length)]; // String
+						case 3:
+							return Math.floor(Math.random() * 1000); // Number
+					}
+				}),
+			);
+
+			// Render table
+			const table = document.getElementById("matrixTable");
+
+			matrix.forEach((row) => {
+				const tr = document.createElement("tr");
+
+				row.forEach((cell) => {
+					const td = document.createElement("td");
+					td.textContent = cell;
+					tr.appendChild(td);
+				});
+
+				table.appendChild(tr);
+			});
+		</script>
+	</body>
+</html>
