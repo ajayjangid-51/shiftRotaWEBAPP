@@ -4,6 +4,7 @@
 // object and its attributes:- , here employee is one of the object of our rota-generation-system project.
 employees=[
     {
+        id:"E1",
         name:"sarvesh",
         gender:"male",
         Location:"bkc",
@@ -15,89 +16,124 @@ employees=[
     },{},{},{},{}
 ]
 
+
+// resource-management-rules:-
 day=[
     {
-        name:"weekday",
-        subCategory:"working",
+        day:"weekday",
+        type:"working",
         shift:"morning",
-        minLeadCount:2,
-        minResourceCount:9,
+        resourceRequire:{
+            total:11,
+            lead:2, // l1+l2+*l3 or l1+1*l3 or l2+1*l3 or l1 or l2 (here 1* means atleast 1 and atmax any as per among the available ones)
+            ssa:3, // 1ssa-1+2ssa-2+*ssa-3 or 3ssa-2+*ssa-3 or 2ssa-1+1ssa-2+*ssa-3
+            sa:6, // 3sa-1+3sa-2+*sa-3 or 2sa-1+5sa-2+*sa-3 or 2sa-1+4sa-1+*sa-3
+            bkcBcp:+-2
 
-
+        }
     },
      {
-        name:"weekday",
-        subCategory:"working",
+        day:"weekday",
+        type:"working",
         shift:"afternoon",
-        minLeadCount:2,
-        minResourceCount:10,
+        resourceRequire:{
+            total:12,
+            lead:1, // l1+l2+*l3 or l1+1*l3 or l2+1*l3 or l1 or l2
+            ssa:4, // 2ssa-1+2ssa-2+*ssa-3 or 1ssa-1+3ssa-2+*ssa-3 or 4ssa-2+*ssa-3
+            sa:7, // 4sa-1+3sa-2+*sa-3 or 3sa-1+4sa-2+*sa-3 or 2sa-1+6sa-2+*sa-3 or 2sa-1+5sa-2+*sa-3 
+            // start making from sa, then ssa and then lead, bcoz all first depends on sa, like ssa's absence depends on sa and lead's absence depends ssa
+            bkcBcp:+-2
 
+        }
     },
-     {
-        name:"weekday",
-        subCategory:"working",
+    {
+        day:"weekday",
+        type:"working",
         shift:"night",
-        minLeadCount:2,
-        minResourceCount:8,
-
+        resourceRequire:{
+            total:9,
+            lead:2, // l1+l2+*l3 or l1+1*l3 or l2+1*l3 or l1 or l2
+            ssa:2, // 1ssa-1+1ssa-2+*ssa-3 or 2ssa-2+*ssa-3 or 2ssa-1+*ssa-3
+            sa:5, // 3sa-1+2sa-2+*sa-3 or 2sa-1+3sa-2+*sa-3
+            bkcBcp:+-2
+        }
     },
-     {
-        name:"weekend",
-        subCategory:"mock",
+    // assigning rules,
+    // first see eligible person for that particular shift, then pick up the top one.
+    {
+        day:"saturday",
+        type:"mock",
         shift:"morning",
-        minLeadCount:1,
-        minResourceCount:7,
-
+        resourceRequire:{
+            total:8,
+            lead:1, // l2+*l3 or l1+*l3 or l2 or l1 (if l3 is available in that group or eligible for satmock)
+            bkcbcp:1,0 or 0,1 //(don't count l3 in bkc,bcp criteria)
+            ssa:2, // ssa-1+ssa-2+*ssa-3 or 2ssa-2+*ssa-3 (here * means take all eligible ssa-3 in satmock to make them learn)
+            bkcbcp:1,1 or 2,0 or 0,2 //(don't count ssa-3 for site-rule)
+            sa:5, // 2sa-1+3sa-2+*sa-3 or 3sa-1+2sa-2+*sa-3
+            bkcbcp:3,2 or 2,3 //(don't count sa-3 for site-rule)
+        }
     },
-  {
-        name:"weekend",
-        subCategory:"mock",
+    {
+        day:"saturday",
+        type:"mock",
         shift:"afternoon",
-        minLeadCount:1,
-        minResourceCount:8,
-
+        resourceRequire:{
+            total:9,
+            lead:1, // l1 or l1+*l3 or l2 or l2+*l3 (if l3 is available in that group or eligible for satmock)
+            ssa:3, // ssa-1+2ssa-2+*ssa-3 or 2ssa-1+1ssa-2+*ssa-3 or 3ssa-2+*ssa-3 (here * means take all eligible ssa-3 in satmock to make them learn)
+            sa:5, // 2sa-1+3sa-2+*sa-3 or 3sa-1+2sa-2+*sa-3
+            bkcBcp:+-2
+        }
     },
       {
-        name:"weekend",
-        subCategory:"mock",
+        day:"saturday",
+        type:"mock",
         shift:"night",
-        minLeadCount:0,
-        minResourceCount:1,
+        resourceRequire:{
+            total:9,
+            lead:0,
+            ssa:0,
+            sa:1, // 1sa-2+1sa-3 or 1sa-1+1sa-3
+            bkcBcp:+-1
+        }
 
     },
-  {
-        name:"weekend",
-        subCategory:"sunday",
+    {
+        day:"sunday",
+        type:"onCall",
         shift:"morning",
-        minResourceCount:7,
+        resourceRequire:{
+            total:4,
+            lead:1, // l2+1l3 or l2 or l1+1l3 or l1
+            ssa:1, // ssa-2+1ssa-3 or ssa-1+1ssa-3
+            sa:2, // 1sa-1+1sa-2+1sa-3 or 2sa-2+1sa-3 or 2sa-1+1sa-3
+            bkcBcp:+-2
+        }
 
     },
       {
-        name:"holiday",
-        subCategory:"SpecailActivity",
-        shift:"morning",
-        minLeadCount:0,
-        minResourceCount:1,
-
-    },
-      {
-        name:"holiday",
-        subCategory:"NoActivity",
-        shift:"morning",
-        minLeadCount:0,
-        minResourceCount:1,
-
+        day:"sunday",
+        type:"free",
+        shift:"night",
+        resourceRequire:{
+            total:9,
+            lead:2, // l1+l2+*l3 or l1+1*l3 or l2+1*l3 or l1 or l2
+            ssa:2, // 1ssa-1+1ssa-2+*ssa-3 or 2ssa-2+*ssa-3 or 2ssa-1+*ssa-3
+            sa:5, // 3sa-1+2sa-2+*sa-3 or 2sa-1+3sa-2+*sa-3
+            bkcBcp:+-2
+        }
     },
 ]
 
-sarvesh (male,bkc,lead1,want-compoff-yes,available-for-night-yes,interested-for-continous-compoff)
-rahul  (male,bkc,lead2,want-compoff-yes,available-for-night-yes,interested-for-one-day-compoff)
-abhishek-gautam
-harsh fatnani
-prabhakar
-shailender-kumar
-praveen-vikraman
-balachander-ganesan
+// sarvesh (male,bkc,lead1,want-compoff-yes,available-for-night-yes,interested-for-continous-compoff)
+// rahul  (male,bkc,lead2,want-compoff-yes,available-for-night-yes,interested-for-one-day-compoff)
+// abhishek-gautam
+// harsh fatnani
+// prabhakar
+// shailender-kumar
+// praveen-vikraman
+// balachander-ganesan
 
 // 
 // 
