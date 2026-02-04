@@ -150,3 +150,7 @@ E41
 // 
 // create a combinations as per the rule of resoure-type, and then see the eligible persons as per bkc,bcp rule and among then pick up by the shift-type-count from suppor-table.
 // if shift-count difference is 3 or more then need to jump over next bkcbcp rule.
+
+// first pick grils(i.e from group1 or group2) for saturday-mock, bcoz they do not support for night.
+// current we have 4 morning girsl and 4 afternoon girls, so pick fix 3 girls simply.
+// and pick boys and then see the bkc,bcp rule.
