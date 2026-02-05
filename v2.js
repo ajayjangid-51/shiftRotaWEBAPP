@@ -1,0 +1,343 @@
+const input = [
+	{
+		id: "E9",
+		name: "sarvesh",
+		gender: "male",
+		Location: "bkc",
+		role: "LEAD1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E10",
+		name: "prabhakr",
+		gender: "male",
+		Location: "bcp",
+		role: "LEAD2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E11",
+		name: "balachander",
+		gender: "male",
+		Location: "bcp",
+		role: "LEAD3",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E12",
+		name: "santosh",
+		gender: "male",
+		Location: "bkc",
+		// role: "SSA1",
+		role: "LEAD3",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E1",
+		name: "gita",
+		gender: "female",
+		Location: "bkc",
+		// role: "SSA2",
+		role: "LEAD3",
+		wantCompoff: "no",
+		availableForNight: "no",
+		interestedForContinousCompoff: "no",
+		group: "G1",
+	},
+	{
+		id: "E13",
+		name: "shubhamKadam",
+		gender: "male",
+		Location: "bkc",
+		role: "SSA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E3",
+		name: "janhvi",
+		gender: "female",
+		Location: "bkc",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G1",
+	},
+	{
+		id: "E14",
+		name: "ajayjangid",
+		gender: "male",
+		Location: "bkc",
+		role: "SA1",
+		wantCompoff: "no",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "no",
+		group: "G3",
+	},
+	{
+		id: "E4",
+		name: "christina",
+		gender: "female",
+		Location: "bkc",
+		role: "SA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G1",
+	},
+	{
+		id: "E19",
+		name: "abhishekMehta",
+		gender: "male",
+		Location: "bkc",
+		role: "SA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E2",
+		name: "savitha",
+		gender: "female",
+		Location: "bcp",
+		role: "SSA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G1",
+	},
+	{
+		id: "E15",
+		name: "srikant",
+		gender: "male",
+		Location: "bcp",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E16",
+		name: "mankala",
+		gender: "male",
+		Location: "bcp",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E17",
+		name: "sudarshan",
+		gender: "male",
+		Location: "bcp",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E18",
+		name: "chirag",
+		gender: "male",
+		Location: "bcp",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+];
+// const employees = input;
+function combinations(arr, k) {
+	const res = [];
+	function backtrack(start, path) {
+		if (path.length === k) return res.push([...path]);
+		for (let i = start; i < arr.length; i++) {
+			path.push(arr[i]);
+			backtrack(i + 1, path);
+			path.pop();
+		}
+	}
+	backtrack(0, []);
+	return res;
+}
+
+function locationCount(group) {
+	let bkc = 0,
+		bcp = 0;
+	for (let p of group) {
+		if (p.Location.toLowerCase() === "bkc") bkc++;
+		if (p.Location.toLowerCase() === "bcp") bcp++;
+	}
+	return { bkc, bcp };
+}
+
+function matchLocation(group, [reqBkc, reqBcp]) {
+	const { bkc, bcp } = locationCount(group);
+	return bkc === reqBkc && bcp === reqBcp;
+}
+
+function* leadGroups() {
+	const lead1 = input.filter((e) => e.role === "LEAD1");
+	const lead2 = input.filter((e) => e.role === "LEAD2");
+	const lead3 = input.filter((e) => e.role === "LEAD3");
+	// console.log(lead1);
+	// console.log(lead2);
+	// console.log(lead3);
+
+	const locationOptions = [
+		[1, 1],
+		[0, 1],
+		[1, 0],
+	];
+
+	// Rule 1: 1-LEAD2 + *-LEAD3
+	for (let l2 of lead2) {
+		for (let count = lead3.length; count >= 0; count--) {
+			for (let combo of combinations(lead3, count)) {
+				// console.log("the combo is : ", combo);
+				const group = [l2, ...combo];
+				const v1 = [];
+				for (let i = 0; i < group.length; i++) {
+					v1.push(group[i].name);
+				}
+				console.log(v1.join(","));
+
+				console.log("-------------------------------------------------------");
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+		}
+	}
+
+	// Rule 2: 1-LEAD1 + *-LEAD3
+	for (let l1 of lead1) {
+		for (let count = lead3.length; count >= 0; count--) {
+			for (let combo of combinations(lead3, count)) {
+				const group = [l1, ...combo];
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+		}
+	}
+}
+
+function* ssaGroups() {
+	const ssa1 = input.filter((e) => e.role === "SSA1");
+	const ssa2 = input.filter((e) => e.role === "SSA2");
+	const ssa3 = input.filter((e) => e.role === "SSA3");
+
+	const locationOptions = [
+		[1, 1],
+		[2, 0],
+		[0, 2],
+	];
+
+	// Rule 1
+	for (let a of ssa1)
+		for (let b of ssa2)
+			for (let count = ssa3.length; count >= 0; count--)
+				for (let c of combinations(ssa3, count)) {
+					const group = [a, b, ...c];
+					for (let loc of locationOptions)
+						if (matchLocation(group, loc)) yield group;
+				}
+
+	// Rule 2
+	for (let a of combinations(ssa2, 2))
+		for (let count = ssa3.length; count >= 0; count--)
+			for (let c of combinations(ssa3, count)) {
+				const group = [...a, ...c];
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+
+	// Rule 3
+	for (let a of combinations(ssa1, 2))
+		for (let count = ssa3.length; count >= 0; count--)
+			for (let c of combinations(ssa3, count)) {
+				const group = [...a, ...c];
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+}
+
+function* saGroups() {
+	const sa1 = input.filter((e) => e.role === "SA1");
+	const sa2 = input.filter((e) => e.role === "SA2");
+	const sa3 = input.filter((e) => e.role === "SA3");
+
+	const locationOptions = [
+		[3, 2],
+		[2, 3],
+	];
+
+	// Rule 1
+	for (let a of combinations(sa1, 2))
+		for (let b of combinations(sa2, 3))
+			for (let count = sa3.length; count >= 0; count--)
+				for (let c of combinations(sa3, count)) {
+					const group = [...a, ...b, ...c];
+					for (let loc of locationOptions)
+						if (matchLocation(group, loc)) yield group;
+				}
+
+	// Rule 2
+	for (let a of combinations(sa1, 3))
+		for (let b of combinations(sa2, 2))
+			for (let count = sa3.length; count >= 0; count--)
+				for (let c of combinations(sa3, count)) {
+					const group = [...a, ...b, ...c];
+					for (let loc of locationOptions)
+						if (matchLocation(group, loc)) yield group;
+				}
+}
+
+function generateTeamsPriority() {
+	const teams = [];
+
+	for (let lead of leadGroups()) {
+		for (let ssa of ssaGroups()) {
+			for (let sa of saGroups()) {
+				teams.push([...lead, ...ssa, ...sa]);
+			}
+		}
+	}
+
+	return teams;
+}
+
+const orderedTeams = generateTeamsPriority();
+console.log("Total Teams:", orderedTeams.length);
+// console.log(orderedTeams);
+// console.log([orderedTeams[0]]);
+/* let output2 = [orderedTeams[0]];
+// let output2 = orderedTeams;
+for (let i = 0; i < output2.length; i++) {
+	let v = [];
+	for (let j = 0; j < output2[i].length; j++) {
+		// v.push(output2[i][j].id);
+		v.push(output2[i][j].name);
+	}
+	console.log(v.join(","));
+} */

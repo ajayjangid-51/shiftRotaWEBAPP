@@ -26,9 +26,11 @@ day=[
         resourceRequire:{
             total:11,
             lead:2, // l1+l2+*l3 or l1+1*l3 or l2+1*l3 or l1 or l2 (here 1* means atleast 1 and atmax any as per among the available ones)
+            bkcbcp:1,1 or 2,0 or 0,2 or 1,0 or 0,1
             ssa:3, // 1ssa-1+2ssa-2+*ssa-3 or 3ssa-2+*ssa-3 or 2ssa-1+1ssa-2+*ssa-3
-            sa:6, // 3sa-1+3sa-2+*sa-3 or 2sa-1+5sa-2+*sa-3 or 2sa-1+4sa-1+*sa-3
-            bkcBcp:+-2
+            bkcbcp:2,1 or 1,2
+            sa:6, // 4sa-1+2sa-2+*sa-3 or 3sa-1+3sa-2+*sa-3 or 2sa-1+5sa-2+*sa-3 or 2sa-1+4sa-1+*sa-3
+            bkcBcp:3,3 or 4,2 or 2,4 // notepoint: don't count 3s-role in bkc,bcp-contraint.
 
         }
     },
@@ -38,11 +40,13 @@ day=[
         shift:"afternoon",
         resourceRequire:{
             total:12,
-            lead:1, // l1+l2+*l3 or l1+1*l3 or l2+1*l3 or l1 or l2
+            lead:2, // l1+l2+*l3 or l1+1*l3 or l2+1*l3 or l1 or l2
+            bkcbcp:1,1 or 2,0 or 0,2 or 1,0 or 0,1
             ssa:4, // 2ssa-1+2ssa-2+*ssa-3 or 1ssa-1+3ssa-2+*ssa-3 or 4ssa-2+*ssa-3
-            sa:7, // 4sa-1+3sa-2+*sa-3 or 3sa-1+4sa-2+*sa-3 or 2sa-1+6sa-2+*sa-3 or 2sa-1+5sa-2+*sa-3 
+            bkcbcp:2,2 or 3,1 or 1,3
+            sa:7, // 5sa-1+2sa-2+*sa-3 or 4sa-1+3sa-2+*sa-3 or 3sa-1+4sa-2+*sa-3 or 2sa-1+6sa-2+*sa-3 or 2sa-1+5sa-2+*sa-3 
             // start making from sa, then ssa and then lead, bcoz all first depends on sa, like ssa's absence depends on sa and lead's absence depends ssa
-            bkcBcp:+-2
+            bkcBcp:4,3 or 3,4 or 5,2 or 2,5
 
         }
     },
@@ -53,9 +57,11 @@ day=[
         resourceRequire:{
             total:9,
             lead:2, // l1+l2+*l3 or l1+1*l3 or l2+1*l3 or l1 or l2
+            bkcbcp:1,1 or 2,0 or 0,2 or 1,0 or 0,1
             ssa:2, // 1ssa-1+1ssa-2+*ssa-3 or 2ssa-2+*ssa-3 or 2ssa-1+*ssa-3
+            bkcbcp:1,1 or 2,0 or 0,2
             sa:5, // 3sa-1+2sa-2+*sa-3 or 2sa-1+3sa-2+*sa-3
-            bkcBcp:+-2
+            bkcBcp:3,2 or 2,3 or 1,4
         }
     },
     // assigning rules,
