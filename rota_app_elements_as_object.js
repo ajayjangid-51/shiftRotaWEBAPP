@@ -12,8 +12,63 @@ employees=[
         wantCompoff:"yes",
         availableForNight:"yes",
         interestedForContinousCompoff:"yes",
-        group:"G1"       
+        group:"G1",
+        totalPLs:0,
+        totalSLs:0,
+        totalULs:0,
+
     },{},{},{},{}
+]
+
+days=[
+    {
+        date:"01march2026",
+        type:"working", // satMock, specialActivity
+        resources:{
+            total:0,
+            morning:{
+                lead:[],
+                ssa:[],
+                sa:[],
+            },
+            afternoon:{
+
+                lead:[],
+                ssa:[],
+                sa:[],
+            },
+            night:{
+
+                lead:[],
+                ssa:[],
+                sa:[],
+            },
+        },
+        leaves:{
+            total:0,
+            morning:{
+
+                SLs:[],
+                PLs:[],
+                ULs:[],
+            },
+             afternoon:{
+
+                SLs:[],
+                PLs:[],
+                ULs:[],
+            },
+             night:{
+
+                SLs:[],
+                PLs:[],
+                ULs:[],
+            },
+        }
+        
+
+    }
+
 ]
 
 
@@ -200,48 +255,6 @@ now SSA-3 and SA-3 depends upon each-other, only one will get off and other shou
 
 
 
-// group2:
-shailender - L1
-rahul - L2
-harsh-fatnani - L3
-sachin - SSA-1
-somesh - SSA-1
-gaurav-shinde - SSA-2
-gaurav-rathva - SA-1
-vivek-pal - SA-1
-krishna-reddy - SA-1
-amarnath - SA2
-praneeth - SA2
-kavin - SA2
-
-
-// group3:
-praveen - L1
-abhishek, - L2
-aniket - SSA-1
-akshay - SSA-2
-mohan-bhor - SA-1
-pratik - SA-1
-anshul - SA-2
-arasan - SA-2
-sushant - SA-2
-aravinth - SA-2
-ajay-v - SA-2
-
-
-
-// group4:-
-gita - SSA-2
-janhavi - SA-1
-christina - SA-2
-savitha - SSA-2
-
-
-// group5:
-vikas - SSA-1
-prajakta - SSA-2
-vaishali - SA-1
-arushina - SA-2
 
 
 

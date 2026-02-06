@@ -353,7 +353,7 @@ const orderedTeams = generateTeamsPriority();
 console.log("Total Teams:", orderedTeams.length);
 // console.log(orderedTeams);
 orderedTeams.sort((a, b) => b.length - a.length);
-for (const combo of orderedTeams) {
+/* for (const combo of orderedTeams) {
 	// console.log(typeof combo);
 	// console.log(combo.length);
 	const v1 = [];
@@ -362,15 +362,4 @@ for (const combo of orderedTeams) {
 		// console.log(emp.name);
 	}
 	console.log(v1.join(","));
-}
-// console.log([orderedTeams[0]]);
-/* let output2 = [orderedTeams[0]];
-// let output2 = orderedTeams;
-for (let i = 0; i < output2.length; i++) {
-	let v = [];
-	for (let j = 0; j < output2[i].length; j++) {
-		// v.push(output2[i][j].id);
-		v.push(output2[i][j].name);
-	}
-	console.log(v.join(","));
 } */
