@@ -126,7 +126,7 @@ day=[
         type:"mock",
         shift:"morning",
         resourceRequire:{
-            total:8,
+            total:8, (this total is excluding *3 roles)
             lead:1, // l2+*l3 or l1+*l3 or l2 or l1 (if l3 is available in that group or eligible for satmock)
             bkcbcp:1,0 or 0,1 //(don't count l3 in bkc,bcp criteria)
             ssa:2, // ssa-1+ssa-2+*ssa-3 or 2ssa-2+*ssa-3 (here * means take all eligible ssa-3 in satmock to make them learn)
@@ -144,6 +144,7 @@ day=[
             lead:1, // l1 or l1+*l3 or l2 or l2+*l3 (if l3 is available in that group or eligible for satmock)
             ssa:3, // ssa-1+2ssa-2+*ssa-3 or 2ssa-1+1ssa-2+*ssa-3 or 3ssa-2+*ssa-3 (here * means take all eligible ssa-3 in satmock to make them learn)
             sa:5, // 2sa-1+3sa-2+*sa-3 or 3sa-1+2sa-2+*sa-3
+            bkcbcp:
             bkcBcp:+-2
         }
     },

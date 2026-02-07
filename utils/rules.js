@@ -225,8 +225,53 @@ ssa:{
 
 
 
-// also notepoint is that: the count of L1,L2,L3, S1,S2,S3 etc all on bkc,bcp should be almost same i.e +-2 atmax is ok only.
+// also notepoint is that: the count of L1,L2,L3, S1,S2,S3 etc all on bkc,bcp should be almost same i.e +-2 atmax is ok only. ya phir rules accordingly define krne honge.
 // so grouping ache se banani hogi.
+
+// next-move : rewise rules for resources and bkc,bcp (do currently for sat-mock) only.
+// now create and maintain a support-table and pickup the people accordingly as 8-line-above in prefix-array-part from smaller to higher-count.
+
+// 
+
+// 
+
+// 
+// friday-morning-people will do only mock
+// friday-afternoon-people will be on off on saturday on night from sunday, but one people among will have to join night as ucc on saturday, (the ucc joining will be among from sa1 or sa2 only)
+// friday-night people will be on off on saturday & sunday and will join morning on monday.
+
+
+// in mock we need 8+9 people (17 people (don't count *3 roles)), so that must be sure the there should be 8 girls, and then 9 people we want 9 people, so make sure on friday morning people count should be atleat 9 or 10. (10 is fine)
+
+
+// note : below counts are excluding *3 roles, (every new-joinee are marked as *3-role and just after 3-4months, they are marked *2 role, 3-4months time is bcoz the person who is leaving, so KT will be given to his replacement.)
+// morning : group3 = 11+4 = 15 
+// afternn : group4 = 11+4 = 15
+// night   : group5 = 10 = 10
+
+// so as seeing above condition required for sat-mock people, we required 17people, but we have minimum 18 people to support for satmock so we are safe irrespective of group who was in friday's morning.
+
+// now who will support oncall for sunday.
+// as for sunday we only require atmax 3 people (one lead who basically joins from home only(lead is basically for some doubts,pim access) and resources will be like one for morning and one other for afternoon). else one people is also enough if something in general-shift-support is required.
+// so people who are in night on last friday, will support for sunday-oncall. and also just note that employee who have joined night on last saturday as into ucc will can't be in oncall on sunday.
+
+
+// for saturday night's ucc:-
+// SA1 or SA2 will have to join ucc night and compoff will be imparted him accordingly. (he might have to work for continous 7 days, but this is very rare like 1 in 5 that means 1 time in 15weeks(4months))
+
+// about leave talk:-
+// if anyone is applying for leave, show the impact to the approver and accordingly he will act to it. (if rota is breaking bcoz of applying leave, then people internally have to swap with each other, which will not be recorded into rota, and also rota will also not re-generated for such case).
+// if multiple people applied leave is somewhere overlapping then, we have to show previous leaves accordingly and give priority to deserving person, or else if very urgent then ask internally to that deserving person to revoke his/her leave.
+
+// saturday support-table (Total, morning, afternoon, ucc)
+// sunday support-table (Total, morning, afternoon, night)
+// how to compare the people via seeing into supoprt-table.
+
+
+// comp-off giving criteria:-
+
+
+
 
 
 

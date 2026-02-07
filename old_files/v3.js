@@ -1,3 +1,6 @@
+const fs = require("node:fs/promises");
+const filePath = "output.txt";
+
 const input = [
 	{
 		id: "E1",
@@ -349,11 +352,20 @@ function generateTeamsPriority() {
 	return teams;
 }
 
+async function appendToFile(filename, data) {
+	try {
+		await fs.appendFile(filename, data + "\n", "utf8"); // Appends data and a newline
+		// console.log("Data appended successfully!");
+	} catch (err) {
+		console.error("Error appending to file:", err);
+	}
+}
+
 const orderedTeams = generateTeamsPriority();
 console.log("Total Teams:", orderedTeams.length);
 // console.log(orderedTeams);
 orderedTeams.sort((a, b) => b.length - a.length);
-/* for (const combo of orderedTeams) {
+for (const combo of orderedTeams) {
 	// console.log(typeof combo);
 	// console.log(combo.length);
 	const v1 = [];
@@ -361,5 +373,8 @@ orderedTeams.sort((a, b) => b.length - a.length);
 		v1.push(emp.name);
 		// console.log(emp.name);
 	}
-	console.log(v1.join(","));
-} */
+	// console.log(v1.join(","));
+	// const fileContent = v1.join(",");
+	// Example usage:
+	appendToFile(filePath, v1.join(","));
+}
