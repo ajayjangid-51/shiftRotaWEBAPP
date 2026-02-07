@@ -279,28 +279,29 @@ function* ssaGroups() {
 	// console.log(ssa2);
 	// console.log(ssa3);
 
+	// here order of location count matters, bcoz at top is foremost needed, and below is bcoz we are settling down bcoz of lack of resources.
 	const locationOptions = [
-		[3, 0],
 		[2, 1],
 		[1, 2],
+		[3, 0],
 		[0, 3],
 	];
 
 	// Rule 1 - 1SSA1+2SSA2+*SSA3
 	for (let a of ssa1)
-		for (let b of combinations(ssa2, 2))
+		for (let b of combinations(ssa2, 2, "SSA2"))
 			for (let count = ssa3.length; count >= 0; count--)
-				for (let c of combinations(ssa3, count)) {
+				for (let c of combinations(ssa3, count, "SSA3")) {
 					const group = [a, ...b, ...c];
 					for (let loc of locationOptions)
 						if (matchLocation(group, loc)) yield group;
 				}
 
 	// Rule 2 - 2SSA1+1SSA2+*SSA3
-	for (let a of combinations(ssa1, 2)) {
-		for (let b of ssa2)
+	for (let a of combinations(ssa1, 2, "SSA1")) {
+		for (let b of combinations(ssa2, 1, "SSA2"))
 			for (let count = ssa3.length; count >= 0; count--)
-				for (let c of combinations(ssa3, count)) {
+				for (let c of combinations(ssa3, count, "SSA3")) {
 					const group = [...a, b, ...c];
 					for (let loc of locationOptions)
 						if (matchLocation(group, loc)) yield group;
@@ -308,9 +309,18 @@ function* ssaGroups() {
 	}
 
 	// Rule 3 - 3SSA2+*SSA3
-	for (let a of combinations(ssa2, 3))
+	for (let a of combinations(ssa2, 3, "SSA2"))
 		for (let count = ssa3.length; count >= 0; count--)
-			for (let c of combinations(ssa3, count)) {
+			for (let c of combinations(ssa3, count, "SSA3")) {
+				const group = [...a, ...c];
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+
+	// Rule 4 - 3SSA1+*SSA3
+	for (let a of combinations(ssa1, 3, "SSA1"))
+		for (let count = ssa3.length; count >= 0; count--)
+			for (let c of combinations(ssa3, count, "SSA3")) {
 				const group = [...a, ...c];
 				for (let loc of locationOptions)
 					if (matchLocation(group, loc)) yield group;
@@ -327,27 +337,37 @@ function* saGroups() {
 	// console.log(sa3);
 
 	const locationOptions = [
-		[4, 1],
 		[3, 2],
 		[2, 3],
+		[4, 1],
 		[1, 4],
 	];
 
 	// Rule 1 - 2SA1+3SA2+*SA3
-	for (let a of combinations(sa1, 2))
-		for (let b of combinations(sa2, 3))
+	for (let a of combinations(sa1, 2, "SA1"))
+		for (let b of combinations(sa2, 3, "SA2"))
 			for (let count = sa3.length; count >= 0; count--)
-				for (let c of combinations(sa3, count)) {
+				for (let c of combinations(sa3, count, "SA3")) {
 					const group = [...a, ...b, ...c];
 					for (let loc of locationOptions)
 						if (matchLocation(group, loc)) yield group;
 				}
 
 	// Rule 2 - 3SA1+2SA2+*SA3
-	for (let a of combinations(sa1, 3))
-		for (let b of combinations(sa2, 2))
+	for (let a of combinations(sa1, 3, "SA1"))
+		for (let b of combinations(sa2, 2, "SA2"))
 			for (let count = sa3.length; count >= 0; count--)
-				for (let c of combinations(sa3, count)) {
+				for (let c of combinations(sa3, count, "SA3")) {
+					const group = [...a, ...b, ...c];
+					for (let loc of locationOptions)
+						if (matchLocation(group, loc)) yield group;
+				}
+
+	// Rule 3 - 4SA1+1SA2+*SA3
+	for (let a of combinations(sa1, 4, "SA1"))
+		for (let b of combinations(sa2, 1, "SA2"))
+			for (let count = sa3.length; count >= 0; count--)
+				for (let c of combinations(sa3, count, "SA3")) {
 					const group = [...a, ...b, ...c];
 					for (let loc of locationOptions)
 						if (matchLocation(group, loc)) yield group;
