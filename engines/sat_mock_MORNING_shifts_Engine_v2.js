@@ -2,51 +2,51 @@ const fs = require("node:fs/promises");
 const filePath = "outputs/sat_mock_MORNING_shifts.txt";
 
 const input = [
-	{
-		id: "E1",
-		name: "gita",
-		gender: "female",
-		Location: "bkc",
-		role: "SSA2",
-		// role: "LEAD3",
-		wantCompoff: "no",
-		availableForNight: "no",
-		interestedForContinousCompoff: "no",
-		group: "G1",
-	},
-	{
-		id: "E3",
-		name: "janhvi",
-		gender: "female",
-		Location: "bkc",
-		role: "SA1",
-		wantCompoff: "yes",
-		availableForNight: "yes",
-		interestedForContinousCompoff: "yes",
-		group: "G1",
-	},
-	{
-		id: "E4",
-		name: "christina",
-		gender: "female",
-		Location: "bkc",
-		role: "SA2",
-		wantCompoff: "yes",
-		availableForNight: "yes",
-		interestedForContinousCompoff: "yes",
-		group: "G1",
-	},
-	{
-		id: "E2",
-		name: "savitha",
-		gender: "female",
-		Location: "bcp",
-		role: "SSA2",
-		wantCompoff: "yes",
-		availableForNight: "yes",
-		interestedForContinousCompoff: "yes",
-		group: "G1",
-	},
+	// {
+	// 	id: "E1",
+	// 	name: "gita",
+	// 	gender: "female",
+	// 	Location: "bkc",
+	// 	role: "SSA2",
+	// 	// role: "LEAD3",
+	// 	wantCompoff: "no",
+	// 	availableForNight: "no",
+	// 	interestedForContinousCompoff: "no",
+	// 	group: "G1",
+	// },
+	// {
+	// 	id: "E3",
+	// 	name: "janhvi",
+	// 	gender: "female",
+	// 	Location: "bkc",
+	// 	role: "SA1",
+	// 	wantCompoff: "yes",
+	// 	availableForNight: "yes",
+	// 	interestedForContinousCompoff: "yes",
+	// 	group: "G1",
+	// },
+	// {
+	// 	id: "E4",
+	// 	name: "christina",
+	// 	gender: "female",
+	// 	Location: "bkc",
+	// 	role: "SA2",
+	// 	wantCompoff: "yes",
+	// 	availableForNight: "yes",
+	// 	interestedForContinousCompoff: "yes",
+	// 	group: "G1",
+	// },
+	// {
+	// 	id: "E2",
+	// 	name: "savitha",
+	// 	gender: "female",
+	// 	Location: "bcp",
+	// 	role: "SSA2",
+	// 	wantCompoff: "yes",
+	// 	availableForNight: "yes",
+	// 	interestedForContinousCompoff: "yes",
+	// 	group: "G1",
+	// },
 	{
 		id: "E9",
 		name: "sarvesh",
@@ -136,10 +136,10 @@ function combinations(arr, k, rtype = "LEAD1") {
 			// arr.push(`DUMMY${dummyCount++}`);
 			arr.push({
 				id: `DUMMY${dummyCount}`,
-				name: `DUMMY${dummyCount}`,
+				name: `${rtype}DUMMY${dummyCount}`,
 				gender: "male",
 				Location: dummyLocation,
-				role: rtype,
+				role: `${rtype}`,
 				wantCompoff: "yes",
 				availableForNight: "yes",
 				interestedForContinousCompoff: "yes",
@@ -385,3 +385,127 @@ for (const combo of orderedTeams) {
 	// Example usage:
 	appendToFile(filePath, v1.join(","));
 }
+
+// ////////////////////////////////////
+
+const data = orderedTeams;
+const minLength = 8;
+const filtered = data.filter((list) => list.length >= minLength);
+// console.log("the filtered is ", filtered);
+
+const isDummy = (name) => name.name.includes("DUMMY");
+
+const countDummies = (list) =>
+	list.reduce((count, name) => count + (isDummy(name) ? 1 : 0), 0);
+
+const groupedByDummyCount = filtered.reduce((groups, list) => {
+	const dummyCount = countDummies(list);
+	// console.log("the dummy count is ", dummyCount);
+
+	if (!groups[dummyCount]) {
+		groups[dummyCount] = [];
+	}
+
+	groups[dummyCount].push(list);
+	return groups;
+}, {});
+
+const namedGroups = Object.fromEntries(
+	Object.entries(groupedByDummyCount).map(([count, lists]) => [
+		`group${count}`,
+		lists,
+	]),
+);
+
+// console.log(typeof namedGroups);
+// console.log(namedGroups);
+
+// const firstKey = Object.keys(namedGroups)[0];
+// console.log(firstKey);
+// Output: key1
+// console.log(namedGroups["group0"]);
+const satSupportTable = {
+	gita: [1, 1, 0, 0],
+	savitha: [0, 0, 0, 0],
+	janhvi: [1, 1, 0, 0],
+	christina: [1, 1, 0, 0],
+	vikas: [1, 0, 1, 0],
+	prajakta: [1, 0, 1, 0],
+	vaishali: [1, 0, 1, 0],
+	arushina: [1, 0, 1, 0],
+	sarvesh: [1, 1, 0, 0],
+	prabhakr: [1, 0, 1, 0],
+	balachander: [1, 0, 1, 0],
+	santosh: [1, 1, 0, 0],
+	shubhamKadam: [1, 0, 1, 0],
+	gauravShinde: [0, 0, 0, 0],
+	ajayjangid: [1, 0, 1, 0],
+	srikant: [1, 1, 0, 0],
+	sudarshan: [1, 1, 0, 0],
+	chirag: [1, 1, 0, 0],
+	abhishekMehta: [1, 0, 1, 0],
+	kavin: [1, 0, 1, 0],
+};
+
+let ans = [];
+
+for (const group in namedGroups) {
+	// if (Object.hasOwnProperty.call(namedGroups, group)) {
+	// 	console.log(group); // Prints the key name
+	// }
+	console.log("the group is", group);
+	console.log("the group0 length is : ", namedGroups[group].length);
+	for (const a of namedGroups[group]) {
+		// console.log("the group0 is : ", namedGroups[group]);
+		// console.log("the a is : ", a);
+		// console.log(a.join(","));
+		let cnt = 0;
+		let maxi = 50000;
+
+		const v1 = [];
+		for (b of a) {
+			// console.log("the arry is : ", b.name.join(","));
+			v1.push(b.name);
+			// console.log(satSupportTable[b]);
+			// console.log("the b is", b);
+			if (b.name.includes("DUMMY")) {
+				cnt += 0;
+			} else {
+				cnt += satSupportTable[b.name][1];
+			}
+		}
+		console.log("the arry is ", v1.join(","));
+		if (cnt < maxi) {
+			maxi = cnt;
+			ans = a;
+		}
+	}
+	console.log("------------------------");
+	if (ans.length > 0) break;
+	// console.log("------------------------");
+}
+
+// console.log("the final ans is : ", ans);
+let ansInPlainArray = [];
+for (const a of ans) {
+	// console.log("the a is : ", a);
+	ansInPlainArray.push(a.name);
+}
+console.log("the final plian arry is : ", ansInPlainArray.join(","));
+// if above ans is empty then move to next group and do while get some value in answer.
+
+// notepoint:-
+/* 
+Total Teams: 54
+the group is group2
+the group0 length is :  6
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA2DUMMY1,SA2DUMMY2
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA2DUMMY1,SA2DUMMY3
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA2DUMMY2,SA2DUMMY3
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA1DUMMY1,SA2DUMMY1
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA1DUMMY1,SA2DUMMY2
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA1DUMMY1,SA2DUMMY3
+------------------------
+the final plian arry is :  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA1DUMMY1,SA2DUMMY3
+*/
+// in the above example, the final array is : the dummy count is same, but dummy selection can have the impact like, LEAD1DUMMY1's repleacement is hard to replace, so choose the dummy accordingly. choose via priority like if list contatining lead's dummy then that should be avoided

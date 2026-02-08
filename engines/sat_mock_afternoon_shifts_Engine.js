@@ -182,11 +182,29 @@ const input = [
 	},
 ];
 // const employees = input;
-function combinations(arr, k) {
+function combinations(arr, k, rtype = "LEAD1") {
 	if (arr.length < k) {
 		let dummyCount = 1;
+		let dummyLocation = "bkc";
 		while (arr.length < k) {
-			arr.push(`DUMMY${dummyCount++}`);
+			// arr.push(`DUMMY${dummyCount++}`);
+			arr.push({
+				id: `DUMMY${dummyCount}`,
+				name: `DUMMY${dummyCount}`,
+				gender: "male",
+				Location: dummyLocation,
+				role: rtype,
+				wantCompoff: "yes",
+				availableForNight: "yes",
+				interestedForContinousCompoff: "yes",
+				group: "GX",
+			});
+			dummyCount++;
+			if (dummyLocation === "bkc") {
+				dummyLocation = "bcp";
+			} else {
+				dummyLocation = "bkc";
+			}
 		}
 	}
 	const res = [];
@@ -240,11 +258,11 @@ function* leadGroups() {
 	];
 
 	// Rule 1: 1-LEAD2 + *-LEAD3
-	for (let l2 of lead2) {
+	for (let l2 of combinations(lead2, 1, "LEAD2")) {
 		for (let count = lead3.length; count >= 0; count--) {
-			for (let combo of combinations(lead3, count)) {
+			for (let combo of combinations(lead3, count, "LEAD3")) {
 				// console.log("the combo is : ", combo);
-				const group = [l2, ...combo];
+				const group = [...l2, ...combo];
 				// const v1 = [];
 				// for (let i = 0; i < group.length; i++) {
 				// 	v1.push(group[i].name);
@@ -259,10 +277,10 @@ function* leadGroups() {
 	}
 
 	// Rule 2: 1-LEAD1 + *-LEAD3
-	for (let l1 of lead1) {
+	for (let l1 of combinations(lead1, 1, "LEAD1")) {
 		for (let count = lead3.length; count >= 0; count--) {
-			for (let combo of combinations(lead3, count)) {
-				const group = [l1, ...combo];
+			for (let combo of combinations(lead3, count, "LEAD3")) {
+				const group = [...l1, ...combo];
 				for (let loc of locationOptions)
 					if (matchLocation(group, loc)) yield group;
 			}
@@ -288,11 +306,11 @@ function* ssaGroups() {
 	];
 
 	// Rule 1 - 1SSA1+2SSA2+*SSA3
-	for (let a of ssa1)
+	for (let a of combinations(ssa1, 1, "SSA1"))
 		for (let b of combinations(ssa2, 2, "SSA2"))
 			for (let count = ssa3.length; count >= 0; count--)
 				for (let c of combinations(ssa3, count, "SSA3")) {
-					const group = [a, ...b, ...c];
+					const group = [...a, ...b, ...c];
 					for (let loc of locationOptions)
 						if (matchLocation(group, loc)) yield group;
 				}
@@ -302,7 +320,7 @@ function* ssaGroups() {
 		for (let b of combinations(ssa2, 1, "SSA2"))
 			for (let count = ssa3.length; count >= 0; count--)
 				for (let c of combinations(ssa3, count, "SSA3")) {
-					const group = [...a, b, ...c];
+					const group = [...a, ...b, ...c];
 					for (let loc of locationOptions)
 						if (matchLocation(group, loc)) yield group;
 				}

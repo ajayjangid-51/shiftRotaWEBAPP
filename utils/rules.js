@@ -272,6 +272,23 @@ ssa:{
 
 
 
+// eligibilty employee pickup logic for input giving to engine:-
+// for weekday
+//    for morning
+//    for afternoon
+//    for night(including sunday-night)
+// for weekend
+//    for satmock
+//        for morning
+//        for afternoon
+//        for ucc
+//    for sunday
+//        for oncall
+//              for morning
+//              for afternoon
+
+
+
 
 
 
