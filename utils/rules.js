@@ -273,19 +273,38 @@ ssa:{
 
 
 // eligibilty employee pickup logic for input giving to engine:-
+// first of all we will seed the data for one-week(monday-to-friday), and then after below will work
 // for weekday
 //    for morning
+//          1.people who are night on friday will be in eligible-list for morning on monday.
+//          2.employee who is in night on saturday(7day-night-man), might be also included in the morning-list only, but will be manage accordingly on monday by the compoff-engine.
+//          3.also the employee whose gender is female and was in afternoon on friday will be eligible for morning on monday.
+
+
 //    for afternoon
+//          1.people who are in morning on friday(irrespective of gender) will be eligible for afternoon on moday
+
 //    for night(including sunday-night)
+// notepoin: 7day night is from (sunday to saturday)
+//          1.people whose gender is male and were in afternoon on friday will be eligible for night from sunday onwards only.
+
+
 // for weekend
 //    for satmock
 //        for morning
+//              1.people who are morning on friday(irrespective of gender) will be eligible for satmock morning on saturday
 //        for afternoon
-//        for ucc
+//              1.peple who are morning on friday(not girls) and girls group was in afternoon on friday will be eligible for saturday mock afternoon
+//        for ucc(1 SA(any))
+//              1.people who were in night on friday are eligible for ucc-night on saturday night
 //    for sunday
-//        for oncall
+//        for oncall (1lead and 2 guy(1 for morning and other for afternoon))
 //              for morning
+//                      1.people are in morning on upcoming next-day (i.e on monday), will be eligile for morning sunday on call
+//                      2.compoff need to be for this cases also.()
 //              for afternoon
+//                      1.people who are in morning on upcoming monday will be eligible for sunday-oncall-afternoon (note: afternoon support will be till around 8pm only, so he can join monday-morning aswell)
+//                      2.compoff entry will be added only for employees who have actually joined on requirement.
 
 
 
