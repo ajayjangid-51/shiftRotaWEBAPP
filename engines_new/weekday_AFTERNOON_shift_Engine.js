@@ -1,0 +1,772 @@
+const fs = require("node:fs/promises");
+const filePath = "outputs/sat_mock_MORNING_shifts.txt";
+import {combinations,locationCount,matchLocation,appendToFile} "../utility_functions/utilities.js"
+
+const input = [
+	{
+		id: "E1",
+		name: "gita",
+		gender: "female",
+		Location: "bkc",
+		role: "SSA2",
+		wantCompoff: "no",
+		availableForNight: "no",
+		interestedForContinousCompoff: "no",
+		group: "G1",
+	},
+	{
+		id: "E3",
+		name: "janhvi",
+		gender: "female",
+		Location: "bkc",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G1",
+	},
+	{
+		id: "E4",
+		name: "christina",
+		gender: "female",
+		Location: "bkc",
+		role: "SA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G1",
+	},
+	{
+		id: "E2",
+		name: "savitha",
+		gender: "female",
+		Location: "bcp",
+		role: "SSA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G1",
+	},
+	{
+		id: "E9",
+		name: "sarvesh",
+		gender: "male",
+		Location: "bkc",
+		role: "LEAD1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E10",
+		name: "prabhakr",
+		gender: "male",
+		Location: "bcp",
+		role: "LEAD2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E11",
+		name: "balachander",
+		gender: "male",
+		Location: "bcp",
+		role: "LEAD3",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E12",
+		name: "santosh",
+		gender: "male",
+		Location: "bkc",
+		role: "SSA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E13",
+		name: "shubhamKadam",
+		gender: "male",
+		Location: "bkc",
+		role: "SSA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E14",
+		name: "gauravShinde",
+		gender: "male",
+		Location: "bkc",
+		role: "SSA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E15",
+		name: "ajayjangid",
+		gender: "male",
+		Location: "bkc",
+		role: "SA1",
+		wantCompoff: "no",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "no",
+		group: "G3",
+	},
+
+	{
+		id: "E16",
+		name: "srikant",
+		gender: "male",
+		Location: "bcp",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E17",
+		name: "sudarshan",
+		gender: "male",
+		Location: "bcp",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E18",
+		name: "chirag",
+		gender: "male",
+		Location: "bcp",
+		role: "SA1",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E19",
+		name: "abhishekMehta",
+		gender: "male",
+		Location: "bkc",
+		role: "SA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+	{
+		id: "E20",
+		name: "kavin",
+		gender: "male",
+		Location: "bcp",
+		role: "SA2",
+		wantCompoff: "yes",
+		availableForNight: "yes",
+		interestedForContinousCompoff: "yes",
+		group: "G3",
+	},
+];
+
+const ROWS = 100;
+// const COLS = 197;
+const COLS = 50;
+const EMP_START_ROW = 2;
+const EMP_IDS = [
+	"E1",
+	"E2",
+	"E3",
+	"E4",
+	"E9",
+	"E5",
+	"E6",
+	"E7",
+	"E8",
+	"E10",
+	"E11",
+	"E12",
+	"E13",
+	"E14",
+	"E15",
+	"E16",
+	"E17",
+	"E18",
+	"E19",
+	"E20",
+	"E21",
+	"E22",
+	"E23",
+	"E24",
+	"E25",
+	"E26",
+	"E27",
+	"E28",
+	"E29",
+	"E30",
+	"E31",
+	"E32",
+	"E33",
+	"E34",
+	"E35",
+	"E36",
+	"E37",
+	"E38",
+	"E39",
+	"E40",
+	"E41",
+	"E42",
+];
+const daysShort = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+// first the eligible people in EMP_IDS array.
+
+function formatDate(d) {
+	return d
+		.toLocaleDateString("en-GB", {
+			day: "2-digit",
+			month: "short",
+			year: "numeric",
+		})
+		.replace(/ /g, "");
+}
+
+// ---------------- MATRIX INIT ----------------
+const matrix = Array.from({ length: ROWS }, () => Array(COLS).fill("-"));
+let d = new Date("2026-03-01");
+for (let c = 20; c < COLS; c++) {
+	matrix[0][c] = formatDate(d);
+	matrix[1][c] = daysShort[d.getDay()];
+	d.setDate(d.getDate() + 1);
+}
+
+// ---------------- INITIAL SEED DATA (POINT 1) ----------------
+for (let c = 20; c <= 20; c++) {
+	// group1
+	matrix[2][c] = "WO"; // E1
+	matrix[3][c] = "WO"; // E2
+	matrix[4][c] = "WO"; // E3
+	matrix[5][c] = "WO"; // E4
+	// group2
+	matrix[6][c] = "WO"; // E5
+	matrix[7][c] = "WO"; // E6
+	matrix[8][c] = "WO"; // E7
+	matrix[9][c] = "WO"; // E8
+	// group3
+	matrix[10][c] = "WO"; // E9
+	matrix[11][c] = "WO"; // E10
+	matrix[12][c] = "WO"; // E11
+	matrix[13][c] = "WO"; // E12
+	matrix[14][c] = "WO"; // E13
+	matrix[15][c] = "WO"; // E14
+	matrix[16][c] = "WO"; // E15
+	matrix[17][c] = "WO"; // E16
+	matrix[18][c] = "WO"; // E17
+	matrix[19][c] = "WO"; // E18
+	matrix[20][c] = "WO"; // E19
+	matrix[21][c] = "WO"; // E20
+	// group4
+	matrix[22][c] = "WO"; // E21
+	matrix[23][c] = "WO"; // E22
+	matrix[24][c] = "WO"; // E23
+	matrix[25][c] = "WO"; // E24
+	matrix[26][c] = "WO"; // E25
+	matrix[27][c] = "WO"; // E26
+	matrix[28][c] = "WO"; // E27
+	matrix[29][c] = "WO"; // E28
+	matrix[30][c] = "WO"; // E29
+	matrix[31][c] = "WO"; // E30
+	matrix[32][c] = "WO"; // E31
+	// group5
+	matrix[33][c] = "N"; // E32
+	matrix[34][c] = "N"; // E33
+	matrix[35][c] = "N"; // E34
+	matrix[36][c] = "N"; // E35
+	matrix[37][c] = "N"; // E36
+	matrix[38][c] = "N"; // E37
+	matrix[39][c] = "N"; // E38
+	matrix[40][c] = "N"; // E39
+	matrix[41][c] = "N"; // E40
+	matrix[42][c] = "N"; // E41
+	matrix[43][c] = "N"; // E42
+}
+for (let c = 21; c <= 25; c++) {
+	// group1
+	matrix[2][c] = "M"; // E1
+	matrix[3][c] = "M"; // E2
+	matrix[4][c] = "M"; // E3
+	matrix[5][c] = "M"; // E4
+
+	// group2
+	matrix[6][c] = "A"; // E5
+	matrix[7][c] = "A"; // E6
+	matrix[8][c] = "A"; // E7
+	matrix[9][c] = "A"; // E8
+
+	// group3
+	matrix[10][c] = "M"; // E9
+	matrix[11][c] = "M"; // E10
+	matrix[12][c] = "M"; // E11
+	matrix[13][c] = "M"; // E12
+	matrix[14][c] = "M"; // E13
+	matrix[15][c] = "M"; // E14
+	matrix[16][c] = "M"; // E15
+	matrix[17][c] = "M"; // E16
+	matrix[18][c] = "M"; // E17
+	matrix[19][c] = "M"; // E18
+	matrix[20][c] = "M"; // E19
+	matrix[21][c] = "M"; // E20
+
+	// group4
+	matrix[22][c] = "A"; // E21
+	matrix[23][c] = "A"; // E22
+	matrix[24][c] = "A"; // E23
+	matrix[25][c] = "A"; // E24
+	matrix[26][c] = "A"; // E25
+	matrix[27][c] = "A"; // E26
+	matrix[28][c] = "A"; // E27
+	matrix[29][c] = "A"; // E28
+	matrix[30][c] = "A"; // E29
+	matrix[31][c] = "A"; // E30
+	matrix[32][c] = "A"; // E31
+
+	// group5
+	matrix[33][c] = "N"; // E32
+	matrix[34][c] = "N"; // E33
+	matrix[35][c] = "N"; // E34
+	matrix[36][c] = "N"; // E35
+	matrix[37][c] = "N"; // E36
+	matrix[38][c] = "N"; // E37
+	matrix[39][c] = "N"; // E38
+	matrix[40][c] = "N"; // E39
+	matrix[41][c] = "N"; // E40
+	matrix[42][c] = "N"; // E41
+	matrix[43][c] = "N"; // E42
+}
+
+// group1
+matrix[2][0] = "E1"; // E1
+matrix[3][0] = "E2"; // E2
+matrix[4][0] = "E3"; // E3
+matrix[5][0] = "E4"; // E4
+// group2
+matrix[6][0] = "E5"; // E5
+matrix[7][0] = "E6"; // E6
+matrix[8][0] = "E7"; // E7
+matrix[9][0] = "E8"; // E8
+// group3
+matrix[10][0] = "E9"; // E9
+matrix[11][0] = "E10"; // E10
+matrix[12][0] = "E11"; // E11
+matrix[13][0] = "E12"; // E12
+matrix[14][0] = "E13"; // E13
+matrix[15][0] = "E14"; // E14
+matrix[16][0] = "E15"; // E15
+matrix[17][0] = "E16"; // E16
+matrix[18][0] = "E17"; // E17
+matrix[19][0] = "E18"; // E18
+matrix[20][0] = "E19"; // E19
+matrix[21][0] = "E20"; // E20
+// group4
+matrix[22][0] = "E21"; // E21
+matrix[23][0] = "E22"; // E22
+matrix[24][0] = "E23"; // E23
+matrix[25][0] = "E24"; // E24
+matrix[26][0] = "E25"; // E25
+matrix[27][0] = "E26"; // E26
+matrix[28][0] = "E27"; // E27
+matrix[29][0] = "E28"; // E28
+matrix[30][0] = "E29"; // E29
+matrix[31][0] = "E30"; // E30
+matrix[32][0] = "E31"; // E31
+// group5
+matrix[33][0] = "E32"; // E32
+matrix[34][0] = "E33"; // E33
+matrix[35][0] = "E34"; // E34
+matrix[36][0] = "E35"; // E35
+matrix[37][0] = "E36"; // E36
+matrix[38][0] = "E37"; // E37
+matrix[39][0] = "E38"; // E38
+matrix[40][0] = "E39"; // E39
+matrix[41][0] = "E40"; // E40
+matrix[42][0] = "E41"; // E41
+matrix[43][0] = "E42"; // E42
+
+// ---------------- SUPPORT TABLES ----------------
+const satSupport = {},
+	sunSupport = {};
+EMP_IDS.forEach((id) => {
+	console.log("the id is", id);
+	satSupport[id] = [0, 0, 0, 0];
+	sunSupport[id] = [0, 0, 0, 0];
+});
+console.log(satSupport);
+console.log(sunSupport);
+
+sunSupport["E32"] = [1, 0, 0, 1];
+sunSupport["E33"] = [1, 0, 0, 1];
+sunSupport["E34"] = [1, 0, 0, 1];
+sunSupport["E35"] = [1, 0, 0, 1];
+sunSupport["E36"] = [1, 0, 0, 1];
+sunSupport["E37"] = [1, 0, 0, 1];
+sunSupport["E38"] = [1, 0, 0, 1];
+sunSupport["E39"] = [1, 0, 0, 1];
+sunSupport["E40"] = [1, 0, 0, 1];
+sunSupport["E41"] = [1, 0, 0, 1];
+sunSupport["E42"] = [1, 0, 0, 1];
+
+// now our above seed-table is all full ready:- (we will also dump this seed data into our database, and will start to load data from DB only)
+// now write the algos for weekday_AFTERNOON_shift_Engine.js
+function getRowById(id) {
+				return EMP_IDS.indexOf(id) + EMP_START_ROW;
+			}
+
+// scan the 
+function getEligibleEmployeesforShift(friCol, shiftType="M"){
+  const eligibleEmployees = [];
+  for(let row = 2;row<20;row++){
+    if(matrix[row][friCol]===shiftType) eligibleEmployees.push(`E${row-1}`);
+  }
+  return eligibleEmployees;
+}
+
+// 
+const eligibleEmployeesForMorning = getEligibleEmployeesforShift(25, "N");
+const eligibleEmployeesForAfternoon = getEligibleEmployeesforShift(25, "M");
+const eligibleEmployeesForNight = getEligibleEmployeesforShift(25, "A");
+
+// const employees = input;
+
+function* leadGroups() {
+	const lead1 = input.filter((e) => e.role === "LEAD1");
+	const lead2 = input.filter((e) => e.role === "LEAD2");
+	const lead3 = input.filter((e) => e.role === "LEAD3");
+	// console.log(lead1);
+	// console.log(lead2);
+	// console.log(lead3);
+
+	const locationOptions = [
+		[1, 1],
+		[0, 1],
+		[1, 0],
+	];
+
+	// Rule 1: 1-LEAD2 + *-LEAD3
+	for (let l2 of combinations(lead2, 1, "LEAD2")) {
+		for (let count = lead3.length; count >= 0; count--) {
+			for (let combo of combinations(lead3, count, "LEAD3")) {
+				// console.log("the combo is : ", combo);
+				const group = [...l2, ...combo];
+				// const v1 = [];
+				// for (let i = 0; i < group.length; i++) {
+				// 	v1.push(group[i].name);
+				// }
+				// console.log(v1.join(","));
+
+				// console.log("-------------------------------------------------------");
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+		}
+	}
+
+	// Rule 2: 1-LEAD1 + *-LEAD3
+	for (let l1 of combinations(lead1, 1, "LEAD1")) {
+		for (let count = lead3.length; count >= 0; count--) {
+			for (let combo of combinations(lead3, count, "LEAD3")) {
+				const group = [...l1, ...combo];
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+		}
+	}
+}
+
+function* ssaGroups() {
+	const ssa1 = input.filter((e) => e.role === "SSA1");
+	const ssa2 = input.filter((e) => e.role === "SSA2");
+	const ssa3 = input.filter((e) => e.role === "SSA3");
+
+	// console.log(ssa1);
+	// console.log(ssa2);
+	// console.log(ssa3);
+
+	const locationOptions = [
+		[1, 1],
+		[2, 0],
+		[0, 2],
+	];
+
+	// Rule 1 - 1SSA1+1SSA2+*SSA3
+	for (let a of combinations(ssa1, 1, "SSA1"))
+		for (let b of combinations(ssa2, 1, "SSA2"))
+			for (let count = ssa3.length; count >= 0; count--)
+				for (let c of combinations(ssa3, count, "SSA3")) {
+					const group = [...a, ...b, ...c];
+					for (let loc of locationOptions)
+						if (matchLocation(group, loc)) yield group;
+				}
+
+	// Rule 2 - 2SSA2+*SSA3
+	for (let b of combinations(ssa2, 2, "SSA2")) {
+		for (let count = ssa3.length; count >= 0; count--)
+			for (let c of combinations(ssa3, count, "SSA3")) {
+				const group = [...b, ...c];
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+	}
+
+	// Rule 3 - 2SSA1+*SSA3
+	for (let a of combinations(ssa1, 2, "SSA1")) {
+		for (let count = ssa3.length; count >= 0; count--)
+			for (let c of combinations(ssa3, count, "SSA3")) {
+				const group = [...a, ...c];
+				for (let loc of locationOptions)
+					if (matchLocation(group, loc)) yield group;
+			}
+	}
+}
+
+function* saGroups() {
+	const sa1 = input.filter((e) => e.role === "SA1");
+	const sa2 = input.filter((e) => e.role === "SA2");
+	const sa3 = input.filter((e) => e.role === "SA3");
+
+	// console.log(sa1);
+	// console.log(sa2);
+	// console.log(sa3);
+
+	const locationOptions = [
+		[3, 2],
+		[2, 3],
+		[4, 1],
+		[1, 4],
+	];
+
+	// Rule 1 - 2SA1+3SA2+*SA3
+	for (let a of combinations(sa1, 2, "SA1"))
+		for (let b of combinations(sa2, 3, "SA2"))
+			for (let count = sa3.length; count >= 0; count--)
+				for (let c of combinations(sa3, count, "SA3")) {
+					const group = [...a, ...b, ...c];
+					for (let loc of locationOptions)
+						if (matchLocation(group, loc)) yield group;
+				}
+
+	// Rule 2 - 3SA1+2SA2+*SA3
+	for (let a of combinations(sa1, 3, "SA1"))
+		for (let b of combinations(sa2, 2, "SA2"))
+			for (let count = sa3.length; count >= 0; count--)
+				for (let c of combinations(sa3, count, "SA3")) {
+					const group = [...a, ...b, ...c];
+					for (let loc of locationOptions)
+						if (matchLocation(group, loc)) yield group;
+				}
+	// Rule 3 - 4SA1+1SA2+*SA3
+	for (let a of combinations(sa1, 4, "SA1"))
+		for (let b of combinations(sa2, 1, "SA2"))
+			for (let count = sa3.length; count >= 0; count--)
+				for (let c of combinations(sa3, count, "SA3")) {
+					const group = [...a, ...b, ...c];
+					for (let loc of locationOptions)
+						if (matchLocation(group, loc)) yield group;
+				}
+}
+
+function generateTeamsPriority() {
+	const teams = [];
+
+	for (let lead of leadGroups()) {
+		for (let ssa of ssaGroups()) {
+			for (let sa of saGroups()) {
+				teams.push([...lead, ...ssa, ...sa]);
+				// teams.push([...lead]);
+			}
+		}
+	}
+
+	return teams;
+}
+
+async function appendToFile(filename, data) {
+	try {
+		await fs.appendFile(filename, data + "\n", "utf8"); // Appends data and a newline
+		// console.log("Data appended successfully!");
+	} catch (err) {
+		console.error("Error appending to file:", err);
+	}
+}
+
+const orderedTeams = generateTeamsPriority();
+console.log("Total Teams:", orderedTeams.length);
+// now we will filter out most correct combo:
+// conditions for more correct satmock-morning combo:-
+// 1.list length should be greater than or equal to 8 (length>=8)
+// 2.now make the group of lists containing 0 dummy, 1 dummy , 2dummy etc , for example group1 , group2 , notepoint : these groups are array of list only,
+
+// now see the lists of group1
+// if group1 is empty then see the lists of group2
+// if group2 is empty then see the list of group3
+// .. so onnn upto no. of groups created.
+
+// rules for choosing list as per the refrenching table:-
+// now how to chooose the people from group as per the refrencing from support-table.
+
+//
+
+// notepoin:-
+// replacement of dummy-employee will be managed manully by manager. by manking special-request to other employees.
+
+// console.log(orderedTeams);
+// orderedTeams.sort((a, b) => b.length - a.length);
+for (const combo of orderedTeams) {
+	// console.log(typeof combo);
+	// console.log(combo.length);
+	const v1 = [];
+	for (const emp of combo) {
+		v1.push(emp.name);
+		// console.log(emp.name);
+	}
+	// console.log(v1.join(","));
+	// const fileContent = v1.join(",");
+	// Example usage:
+	appendToFile(filePath, v1.join(","));
+}
+
+// ////////////////////////////////////
+
+const data = orderedTeams;
+const minLength = 8;
+const filtered = data.filter((list) => list.length >= minLength);
+// console.log("the filtered is ", filtered);
+
+const isDummy = (name) => name.name.includes("DUMMY");
+
+const countDummies = (list) =>
+	list.reduce((count, name) => count + (isDummy(name) ? 1 : 0), 0);
+
+const groupedByDummyCount = filtered.reduce((groups, list) => {
+	const dummyCount = countDummies(list);
+	// console.log("the dummy count is ", dummyCount);
+
+	if (!groups[dummyCount]) {
+		groups[dummyCount] = [];
+	}
+
+	groups[dummyCount].push(list);
+	return groups;
+}, {});
+
+const namedGroups = Object.fromEntries(
+	Object.entries(groupedByDummyCount).map(([count, lists]) => [
+		`group${count}`,
+		lists,
+	]),
+);
+
+// console.log(typeof namedGroups);
+// console.log(namedGroups);
+
+// const firstKey = Object.keys(namedGroups)[0];
+// console.log(firstKey);
+// Output: key1
+// console.log(namedGroups["group0"]);
+const satSupportTable = {
+	gita: [1, 1, 0, 0],
+	savitha: [0, 0, 0, 0],
+	janhvi: [1, 1, 0, 0],
+	christina: [1, 1, 0, 0],
+	vikas: [1, 0, 1, 0],
+	prajakta: [1, 0, 1, 0],
+	vaishali: [1, 0, 1, 0],
+	arushina: [1, 0, 1, 0],
+	sarvesh: [1, 1, 0, 0],
+	prabhakr: [1, 0, 1, 0],
+	balachander: [1, 0, 1, 0],
+	santosh: [1, 1, 0, 0],
+	shubhamKadam: [1, 0, 1, 0],
+	gauravShinde: [0, 0, 0, 0],
+	ajayjangid: [1, 0, 1, 0],
+	srikant: [1, 1, 0, 0],
+	sudarshan: [1, 1, 0, 0],
+	chirag: [1, 1, 0, 0],
+	abhishekMehta: [1, 0, 1, 0],
+	kavin: [1, 0, 1, 0],
+};
+
+let ans = [];
+
+for (const group in namedGroups) {
+	// if (Object.hasOwnProperty.call(namedGroups, group)) {
+	// 	console.log(group); // Prints the key name
+	// }
+	console.log("the group is", group);
+	console.log("the group0 length is : ", namedGroups[group].length);
+	for (const a of namedGroups[group]) {
+		// console.log("the group0 is : ", namedGroups[group]);
+		// console.log("the a is : ", a);
+		// console.log(a.join(","));
+		let cnt = 0;
+		let maxi = 50000;
+
+		const v1 = [];
+		for (b of a) {
+			// console.log("the arry is : ", b.name.join(","));
+			v1.push(b.name);
+			// console.log(satSupportTable[b]);
+			// console.log("the b is", b);
+			if (b.name.includes("DUMMY")) {
+				cnt += 0;
+			} else {
+				cnt += satSupportTable[b.name][1];
+			}
+		}
+		console.log("the arry is ", v1.join(","));
+		if (cnt < maxi) {
+			maxi = cnt;
+			ans = a;
+		}
+	}
+	console.log("------------------------");
+	if (ans.length > 0) break;
+	// console.log("------------------------");
+}
+
+// console.log("the final ans is : ", ans);
+let ansInPlainArray = [];
+for (const a of ans) {
+	// console.log("the a is : ", a);
+	ansInPlainArray.push(a.name);
+}
+console.log("the final plian arry is : ", ansInPlainArray.join(","));
+// if above ans is empty then move to next group and do while get some value in answer.
+
+// notepoint:-
+/* 
+Total Teams: 54
+the group is group2
+the group0 length is :  6
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA2DUMMY1,SA2DUMMY2
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA2DUMMY1,SA2DUMMY3
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA2DUMMY2,SA2DUMMY3
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA1DUMMY1,SA2DUMMY1
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA1DUMMY1,SA2DUMMY2
+the arry is  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA1DUMMY1,SA2DUMMY3
+------------------------
+the final plian arry is :  sarvesh,santosh,gauravShinde,srikant,sudarshan,chirag,SA1DUMMY1,SA2DUMMY3
+*/
+// in the above example, the final array is : the dummy count is same, but dummy selection can have the impact like, LEAD1DUMMY1's repleacement is hard to replace, so choose the dummy accordingly. choose via priority like if list contatining lead's dummy then that should be avoided
